@@ -1,20 +1,36 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, Text, View, Image } from "react-native";
+import LongButton from "./components/LongButton";
+import Colors from "./components/Colors";
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+      <View>
+        <Image source={require("./assets/logo.png")} style={styles.logo} />
+      </View>
+      <LongButton context="출근하기" />
+      <LongButton
+        context="관리자로 로그인"
+        bgColor={Colors.primary_white}
+        textColor={Colors.text_gray}
+      />
       <StatusBar style="auto" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  logo: {
+    width: 200,
+    height: 200,
+    marginBottom: 44,
+  },
+
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: Colors.primary_background,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
