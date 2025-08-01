@@ -1,21 +1,60 @@
-import { StyleSheet, View, Text, Pressable } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, View, Text } from "react-native";
 import Colors from "../components/Colors";
 
-import RoundButton from "../components/RoundButton";
 import LongButton from "../components/LongButton";
 import GoBack from "../components/GoBack";
 
-const Attendence = ({ navigation }) => {
+const Attendence = ({ navigation, route }) => {
+    const { employeeName } = route.params;
+
+    const [datetime, setDatetime] = useState({
+        year: "",
+        month: "",
+        day: "",
+        hour: "",
+        minute: "",
+        second: "",
+    });
+
+    useEffect(() => {
+        const fetchDatetime = async () => {
+            try {
+                const response = await fetch(
+                    "http://10.0.2.2:8000/get/datetime"
+                );
+                const data = await response.json();
+                setDatetime(data);
+            } catch (e) {
+                console.error("Failed to fetch datetime:", e);
+            }
+        };
+
+        fetchDatetime();
+
+        const intervalId = setInterval(() => {
+            fetchDatetime();
+        }, 1000 * 60); //1분에 한 번씩 api받아오기
+        return () => clearInterval(intervalId);
+    }, []);
+
     return (
         <View style={styles.container}>
             <GoBack nav={navigation}></GoBack>
 
-            <Text style={styles.title}>A월 B일</Text>
-            <RoundButton
-                context="직원A"
-                wrapperStyle={styles.pictureWrapper}
-                textStyle={styles.pictureText}
-            />
+            <Text style={styles.title}>
+                {datetime.month}월 {datetime.day}일
+            </Text>
+            <Text style={styles.subTitle}>
+                {datetime.hour}시 {datetime.minute}분
+            </Text>
+
+            <View>
+                <View style={styles.ButtonShadow} />
+                <View style={styles.pictureWrapper}>
+                    <Text style={styles.pictureText}>{employeeName}</Text>
+                </View>
+            </View>
 
             <View>
                 <LongButton context="출근하기" />
@@ -47,18 +86,40 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 40,
         fontWeight: 900,
-        marginBottom: 12,
+        marginBottom: 10,
+    },
+
+    subTitle: {
+        fontSize: 20,
+        fontWeight: 800,
+        marginBottom: 20,
     },
 
     pictureWrapper: {
-        width: 230,
-        height: 230,
+        position: "relative",
+        width: 200,
+        height: 200,
         borderRadius: 50,
         backgroundColor: Colors.primary_gray,
+        marginBottom: 30,
+
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    ButtonShadow: {
+        position: "absolute",
+        width: 200,
+        height: 200,
+        borderRadius: 50,
+        backgroundColor: "#C0C0C0",
+        top: 5,
+        left: 5,
     },
 
     pictureText: {
         color: "#000000",
         fontSize: 25,
+        fontWeight: 500,
     },
 });
