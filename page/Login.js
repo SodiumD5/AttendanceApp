@@ -1,5 +1,4 @@
 import {
-    StatusBar,
     StyleSheet,
     View,
     Text,
@@ -9,7 +8,7 @@ import {
     Keyboard,
     Animated,
 } from "react-native";
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import Colors from "../components/Colors";
 
@@ -21,9 +20,6 @@ const wrong_pw = () => {
 };
 
 const Login = ({ navigation }) => {
-    const id = "admin";
-    const pw = "1234";
-
     const [inputId, setinputId] = useState("");
     const [inputPw, setinputPw] = useState("");
 
@@ -31,6 +27,37 @@ const Login = ({ navigation }) => {
     const buttonBottom = useRef(new Animated.Value(70)).current;
 
     const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+    const handleLogin = async () => {
+        const loginInfo = {
+            id: inputId,
+            pw: inputPw,
+        };
+
+        try {
+            const url = "http://10.0.2.2:8000/post/loginInfo";
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(loginInfo),
+            });
+            console.log("send success!");
+
+            const result = await response.json();
+
+            if (response.status == 400) {
+                wrong_pw();
+            } else {
+                navigation.push("AdminMenu");
+            }
+            setinputId("");
+            setinputPw("");
+        } catch (e) {
+            console.log(e);
+        }
+    };
 
     useEffect(() => {
         const showSubscription = Keyboard.addListener(
@@ -94,12 +121,16 @@ const Login = ({ navigation }) => {
                 style={styles.TextBox}
                 value={inputId}
                 onChangeText={(text) => setinputId(text)}
+                autocomplete="off"
+                autoCorrect={false}
             ></TextInput>
             <Text style={styles.Text}>비밀번호</Text>
             <TextInput
                 style={styles.TextBox}
                 value={inputPw}
                 onChangeText={(text) => setinputPw(text)}
+                autocomplete="off"
+                autoCorrect={false}
             ></TextInput>
 
             <Animated.View
@@ -107,41 +138,7 @@ const Login = ({ navigation }) => {
             >
                 <ShortButton
                     context="로그인하기"
-                    onPress={() => {
-                        const loginInfo = {
-                            id: inputId,
-                            pw: inputPw,
-                        };
-
-                        const asyncFn = async () => {
-                            try {
-                                const url =
-                                    "http://10.0.2.2:8000/post/loginInfo";
-                                const response = await fetch(url, {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                    },
-                                    body: JSON.stringify(loginInfo),
-                                });
-                                console.log("send success!");
-
-                                const result = await response.json();
-
-                                if (response.status == 400) {
-                                    wrong_pw();
-                                } else {
-                                    navigation.push("AdminMenu");
-                                }
-                                setinputId("");
-                                setinputPw("");
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        };
-
-                        asyncFn();
-                    }}
+                    onPress={handleLogin}
                 ></ShortButton>
             </Animated.View>
         </Animated.View>

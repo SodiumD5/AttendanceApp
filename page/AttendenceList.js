@@ -1,4 +1,5 @@
 import { StyleSheet, View, Text, FlatList } from "react-native";
+import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 
 import IconM from "react-native-vector-icons/MaterialCommunityIcons";
@@ -7,7 +8,23 @@ import RoundButton from "../components/RoundButton";
 import GoBack from "../components/GoBack";
 
 const AttendenceList = ({ navigation }) => {
-    let employeeList = ["직원A", "직원B", "직원C", "직원D", "직원E", "직원F", "신원미상", "은 신이다"];
+    const [staffInfo, setStaffInfo] = useState();
+
+    useEffect(() => {
+        const getStaffList = async () => {
+            try {
+                const response = await fetch(
+                    "http://10.0.2.2:8000/get/staffList"
+                );
+                const info = await response.json();
+                setStaffInfo(info);
+            } catch (e) {
+                console.log("failed to get staff list : ", e);
+            }
+        };
+
+        getStaffList();
+    }, []);
 
     return (
         <View style={styles.container}>
@@ -20,17 +37,16 @@ const AttendenceList = ({ navigation }) => {
                 />
             </View>
             <Text style={styles.title}>출근 체크</Text>
-
             <FlatList
-                data={employeeList}
-                numColumns={2} 
-                keyExtractor={(item, index) => index.toString()} 
-                renderItem={({ item, index }) => (
+                data={staffInfo}
+                numColumns={2}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
                     <RoundButton
-                        context={item} 
+                        context={item.name}
                         onPress={() =>
                             navigation.push("Attendence", {
-                                employeeName: item,
+                                employeeName: item.name,
                             })
                         }
                     />
@@ -70,5 +86,4 @@ const styles = StyleSheet.create({
     setRow: {
         flexDirection: "row",
     },
-
 });

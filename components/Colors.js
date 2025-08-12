@@ -5,7 +5,7 @@ const Colors = {
   primary_white: "#F0F0F0",
   primary_gray: "#D9D9D9",
   primary_background: "#F9F9F9",
-  admin_background: "#EEEEEE",
+  admin_background: "#F9F9F9",
   text_gray: "#333333",
 };
 

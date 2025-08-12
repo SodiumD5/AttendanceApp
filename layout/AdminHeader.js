@@ -7,7 +7,7 @@ const AdminHeader = ({ nav, menuName }) => {
     return (
         <View style={styles.header}>
             <Text style={styles.headerText}>{menuName}</Text>
-            { nav && <GoBack nav={nav} pos={30}></GoBack>}
+            {nav && <GoBack nav={nav} pos={30}></GoBack>}
         </View>
     );
 };
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     },
 
     headerText: {
-        marginTop:30,
+        marginTop: 20,
         fontSize: 32,
         fontWeight: 800,
         color: "#000000",
