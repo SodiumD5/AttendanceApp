@@ -1,5 +1,7 @@
 const Colors = {
     primary_blue: "#007AFF",
+    primary_purple: "#596DE9",
+    primary_red: "#E53935",
     primary_green: "#34C759",
     primary_yellow: "#FFC107",
     primary_white: "#F0F0F0",

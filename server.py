@@ -85,6 +85,18 @@ def restData():
         response = toSupabase.load_rest_record(data)
         return jsonify(response), 200
 
+@app.route('/post/workData', methods=['post'])
+def workData():
+    if request.is_json:
+        data = request.get_json()
+        response = toSupabase.load_work_data(data)
+        return jsonify(response), 200
+    
+@app.route('/get/active', methods=['get'])
+def active():
+    active_data = toSupabase.load_active_employee()
+    return jsonify(active_data), 200
+    
 # 서버 시작
 if __name__ == '__main__':
     app.run(port = 8000, debug=True)

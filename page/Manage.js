@@ -6,6 +6,7 @@ import Colors from "../components/Colors";
 
 import AdminHeader from "../layout/AdminHeader";
 import StaffCard from "../components/StaffCard";
+import AlertModal from "../components/AlertModal";
 
 const Manage = ({ navigation }) => {
     const [staffInfo, setStaffInfo] = useState([]);
@@ -59,6 +60,7 @@ const Manage = ({ navigation }) => {
         }
 
         var enterDay = registerDay.toISOString().split("T")[0];
+
         const postData = { name: newStaffName, registerDay: enterDay };
         const url = "http://10.0.2.2:8000/post/addStaff";
         const response = await fetch(url, {
@@ -89,6 +91,22 @@ const Manage = ({ navigation }) => {
             month: "long",
             day: "numeric",
         });
+    };
+
+    const renderAlert = () => {
+        let bgColor;
+        if (confirmMessage.status === 400) {
+            bgColor = Colors.primary_red;
+        } else {
+            bgColor = Colors.primary_purple;
+        }
+        return (
+            <AlertModal
+                isVisible={isConfirmVisible}
+                setIsVisible={setIsConfirmVisible}
+                title={confirmMessage.message}
+                bgColor={bgColor}></AlertModal>
+        );
     };
 
     return (
@@ -145,19 +163,7 @@ const Manage = ({ navigation }) => {
                 onCancel={hideDatePicker}
             />
 
-            <Modal isVisible={isConfirmVisible} onBackdropPress={toggleConfirm}>
-                <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>{confirmMessage.message}</Text>
-                    <TouchableOpacity
-                        style={{
-                            ...styles.modalButton,
-                            backgroundColor: confirmMessage.status === 400 ? "#E53935" : "#596DE9",
-                        }}
-                        onPress={toggleConfirm}>
-                        <Text style={styles.modalButtonText}>확인</Text>
-                    </TouchableOpacity>
-                </View>
-            </Modal>
+            {renderAlert()}
         </View>
     );
 };

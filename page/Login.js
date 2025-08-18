@@ -97,7 +97,7 @@ const Login = ({ navigation }) => {
             <GoBack nav={navigation}></GoBack>
             {!isKeyboardVisible && (
                 <View>
-                    <Image source={require("../assets/logo.png")} style={styles.logo} />
+                    <Image source={require("../assets/admin.png")} style={styles.logo} />
                 </View>
             )}
             <Text style={styles.title}>관리자 로그인</Text>

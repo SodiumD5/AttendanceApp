@@ -1,6 +1,5 @@
 import { StyleSheet, View, Text, FlatList } from "react-native";
 import { useState, useEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
 
 import IconM from "react-native-vector-icons/MaterialCommunityIcons";
 import Colors from "../components/Colors";

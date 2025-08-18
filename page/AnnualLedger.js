@@ -250,8 +250,9 @@ const styles = StyleSheet.create({
     emptyText: {
         textAlign: "center",
         marginTop: 50,
-        fontSize: 16,
+        fontSize: 18,
         color: Colors.text_gray,
+        fontWeight: "bold",
     },
     modalOverlay: {
         flex: 1,
