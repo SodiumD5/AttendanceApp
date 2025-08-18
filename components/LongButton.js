@@ -41,6 +41,7 @@ export default function LongButton({ context, bgColor, textColor, onPress }) {
             fontWeight: 600,
             color: buttonTextColor,
         },
+
     });
 
     return (

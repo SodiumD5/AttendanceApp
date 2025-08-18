@@ -14,17 +14,16 @@ def get_datetime():
         "year": now.year,
         "month": now.month,
         "day": now.day,
-        "hour": now.hour,
-        "minute": now.minute,
-        "second": now.second,
-        "timestamp": now.timestamp()
+        "hour": f"{now.hour:02}",
+        "minute": f"{now.minute:02}",
+        "second": f"{now.second:02}",
     }
     
     # JSON 형식으로 응답 전송
     return jsonify(response)
 
 @app.route('/post/loginInfo', methods=['POST'])
-def post_loginInfo():
+def loginInfo():
     if request.is_json:
         data = request.get_json()
         
@@ -35,12 +34,12 @@ def post_loginInfo():
             return jsonify({"message": "wrong data!"}), 400
         
 @app.route('/get/staffList', methods=['GET'])
-def get_stafflist():
+def staffList():
     staff_info = toSupabase.get_staff()
     return jsonify(staff_info)
 
 @app.route('/post/addStaff', methods=['POST'])
-def add_staffList():
+def addStaff():
     if request.is_json:
         data = request.get_json()
         response = toSupabase.add_staff(data['name'], data['registerDay'])
@@ -52,11 +51,32 @@ def add_staffList():
             return jsonify({"message" : "추가되었습니다"}), 200
 
 @app.route('/post/inactive', methods=['post'])
-def inactive_staff():
+def inactive():
     if request.is_json:
         data = request.get_json()
         toSupabase.inactive_staff(data)
         return jsonify({"message" : "삭제 되었습니다."})
+
+@app.route('/post/work', methods=['post'])
+def work():
+    if request.is_json:
+        data = request.get_json()
+        toSupabase.record_work(data)
+        return '', 204
+    
+@app.route('/post/workstate', methods=['post'])
+def workstate():
+    if request.is_json:
+        data = request.get_json()
+        response = toSupabase.load_work_record(data)
+        return jsonify({"data" : response}), 200
+
+@app.route('/post/useHalf', methods=['post'])
+def useHalf():
+    if request.is_json:
+        data = request.get_json()
+        toSupabase.record_half_use(data)
+        return '', 204
 
 # 서버 시작
 if __name__ == '__main__':

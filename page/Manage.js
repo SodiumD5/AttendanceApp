@@ -196,7 +196,7 @@ export default Manage;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.admin_background,
+        backgroundColor: Colors.background,
     },
     listContent: {
         paddingBottom: 80,

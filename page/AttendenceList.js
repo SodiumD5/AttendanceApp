@@ -13,9 +13,7 @@ const AttendenceList = ({ navigation }) => {
     useEffect(() => {
         const getStaffList = async () => {
             try {
-                const response = await fetch(
-                    "http://10.0.2.2:8000/get/staffList"
-                );
+                const response = await fetch("http://10.0.2.2:8000/get/staffList");
                 const info = await response.json();
                 setStaffInfo(info);
             } catch (e) {
@@ -62,7 +60,7 @@ export default AttendenceList;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.primary_background,
+        backgroundColor: Colors.background,
         alignItems: "center",
         justifyContent: "center",
     },
