@@ -89,10 +89,9 @@ const Attendence = ({ navigation, route }) => {
                 body: JSON.stringify(postData),
             });
             const response_body = await response.json();
-            const record = response_body["data"];
 
-            setWorkState(record["isWork"]);
-            setUseHalf(record["isHalf"])
+            setWorkState(response_body["isWork"]);
+            setUseHalf(response_body["isHalf"]);
         } catch (e) {
             console.error("Failed to fetch work state:", e);
         }

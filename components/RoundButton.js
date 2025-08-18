@@ -1,19 +1,11 @@
 import { StyleSheet, View, Text, Pressable } from "react-native";
 import Colors from "../components/Colors";
 
-export default function RoundButton({
-    context,
-    wrapperStyle,
-    textStyle,
-    onPress,
-}) {
+export default function RoundButton({ context, wrapperStyle, textStyle, onPress }) {
     return (
         <View style={styles.buttonContainer}>
             <View style={styles.ButtonShadow} />
-            <Pressable
-                onPress={onPress}
-                style={[styles.roundButtonWrapper, wrapperStyle]}
-            >
+            <Pressable onPress={onPress} style={[styles.roundButtonWrapper, wrapperStyle]}>
                 <Text style={[styles.roundButton, textStyle]}>{context}</Text>
             </Pressable>
         </View>

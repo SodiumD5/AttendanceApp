@@ -1,13 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-    StyleSheet,
-    View,
-    FlatList,
-    Text,
-    TouchableOpacity,
-    TextInput,
-    Alert,
-} from "react-native";
+import { StyleSheet, View, FlatList, Text, TouchableOpacity, TextInput, Alert } from "react-native";
 import Modal from "react-native-modal";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Colors from "../components/Colors";
@@ -28,9 +20,7 @@ const Manage = ({ navigation }) => {
     useEffect(() => {
         const getStaffList = async () => {
             try {
-                const response = await fetch(
-                    "http://10.0.2.2:8000/get/staffList"
-                );
+                const response = await fetch("http://10.0.2.2:8000/get/staffList");
                 const info = await response.json();
                 setStaffInfo(info);
             } catch (e) {
@@ -69,10 +59,6 @@ const Manage = ({ navigation }) => {
         }
 
         var enterDay = registerDay.toISOString().split("T")[0];
-        console.log(
-            `Adding new staff: ${newStaffName}, registerDay: ${enterDay}`
-        );
-
         const postData = { name: newStaffName, registerDay: enterDay };
         const url = "http://10.0.2.2:8000/post/addStaff";
         const response = await fetch(url, {
@@ -94,7 +80,7 @@ const Manage = ({ navigation }) => {
         toggleConfirm();
         setNewStaffName("");
         setRegisterDay(new Date());
-        setRefresh(prevRefresh => prevRefresh + 1);
+        setRefresh((prevRefresh) => prevRefresh + 1);
     };
 
     const formatDate = (date) => {
@@ -139,24 +125,15 @@ const Manage = ({ navigation }) => {
                         multiline={false}
                         keyboardType="default"
                     />
-                    <TouchableOpacity
-                        style={styles.dateInput}
-                        onPress={showDatePicker}
-                    >
-                        <Text style={styles.dateText}>
-                            {formatDate(registerDay)}
-                        </Text>
+                    <TouchableOpacity style={styles.dateInput} onPress={showDatePicker}>
+                        <Text style={styles.dateText}>{formatDate(registerDay)}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.modalButton}
-                        onPress={handleAddStaff}
-                    >
+                    <TouchableOpacity style={styles.modalButton} onPress={handleAddStaff}>
                         <Text style={styles.modalButtonText}>추가하기</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.modalButton, styles.cancelButton]}
-                        onPress={toggleModal}
-                    >
+                        onPress={toggleModal}>
                         <Text style={styles.modalButtonText}>취소</Text>
                     </TouchableOpacity>
                 </View>
@@ -170,19 +147,13 @@ const Manage = ({ navigation }) => {
 
             <Modal isVisible={isConfirmVisible} onBackdropPress={toggleConfirm}>
                 <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>
-                        {confirmMessage.message}
-                    </Text>
+                    <Text style={styles.modalTitle}>{confirmMessage.message}</Text>
                     <TouchableOpacity
                         style={{
                             ...styles.modalButton,
-                            backgroundColor:
-                                confirmMessage.status === 400
-                                    ? "#E53935"
-                                    : "#596DE9",
+                            backgroundColor: confirmMessage.status === 400 ? "#E53935" : "#596DE9",
                         }}
-                        onPress={toggleConfirm}
-                    >
+                        onPress={toggleConfirm}>
                         <Text style={styles.modalButtonText}>확인</Text>
                     </TouchableOpacity>
                 </View>

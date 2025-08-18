@@ -19,7 +19,7 @@ export default function StaffCard({ name, date, refresh }) {
             },
             body: JSON.stringify(name),
         });
-        refresh(prevRefresh => prevRefresh + 1);
+        refresh((prevRefresh) => prevRefresh + 1);
         toggleConfirm();
     };
 
@@ -42,21 +42,17 @@ export default function StaffCard({ name, date, refresh }) {
 
             <Modal isVisible={deleteVisible} onBackdropPress={toggleConfirm}>
                 <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>정말 삭제 하시겠습니까?</Text>
+                    <Text style={styles.modalTitle}>정말 삭제하시겠습니까?</Text>
                     <Text>
-                        삭제를 하면 더 이상 화면에서 보이지 않습니다. 단, 보이지
-                        않을 뿐, 같은 이름을 다시 추가하진 못 합니다.
+                        해당 기능은, 숨기기 기능입니다. 숨기기를 해제하고 싶다면, 같은 이름을 다시
+                        추가해 보세요!
                     </Text>
-                    <TouchableOpacity
-                        style={styles.modalButton}
-                        onPress={handleDelete}
-                    >
+                    <TouchableOpacity style={styles.modalButton} onPress={handleDelete}>
                         <Text style={styles.modalButtonText}>확인</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.modalButton, styles.cancelButton]}
-                        onPress={toggleConfirm}
-                    >
+                        onPress={toggleConfirm}>
                         <Text style={styles.modalButtonText}>취소</Text>
                     </TouchableOpacity>
                 </View>

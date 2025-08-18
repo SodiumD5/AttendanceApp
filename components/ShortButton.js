@@ -1,7 +1,7 @@
 import { StyleSheet, View, Text, Pressable } from "react-native";
 import Colors from "./Colors";
 
-const ShortButton = ({context, onPress}) => {
+const ShortButton = ({ context, onPress }) => {
     return (
         <View style={styles.buttonContainer}>
             <View style={styles.ButtonShadow} />

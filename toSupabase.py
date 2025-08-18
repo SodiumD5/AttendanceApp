@@ -144,3 +144,17 @@ def record_half_use(data):
         supabase.table('Attendence').insert(insert_data).execute()
 
     check_rest(name, date, 'half') #반차 사용 횟수 체크
+
+def load_rest_record(data):
+    year = data['year']
+    month = data['month']
+    
+    active_employee = supabase.table("Employee").select("name") \
+        .eq('active', True).execute()
+    active = []
+    for data in active_employee.data:
+        active.append(data['name'])
+    
+    response = supabase.table("RestCount").select("*").order('name') \
+        .eq('year', year).eq('month', month).in_('name', active).execute()
+    return response.data

@@ -1,13 +1,4 @@
-import {
-    StyleSheet,
-    View,
-    Text,
-    TextInput,
-    Image,
-    Alert,
-    Keyboard,
-    Animated,
-} from "react-native";
+import { StyleSheet, View, Text, TextInput, Image, Alert, Keyboard, Animated } from "react-native";
 import { useState, useEffect, useRef } from "react";
 
 import Colors from "../components/Colors";
@@ -60,22 +51,19 @@ const Login = ({ navigation }) => {
     };
 
     useEffect(() => {
-        const showSubscription = Keyboard.addListener(
-            "keyboardDidShow",
-            (e) => {
-                setIsKeyboardVisible(true);
-                Animated.timing(keyboardHeight, {
-                    toValue: -e.endCoordinates.height + 100,
-                    duration: 250,
-                    useNativeDriver: false,
-                }).start();
-                Animated.timing(buttonBottom, {
-                    toValue: e.endCoordinates.height - 130,
-                    duration: 250,
-                    useNativeDriver: false,
-                }).start();
-            }
-        );
+        const showSubscription = Keyboard.addListener("keyboardDidShow", (e) => {
+            setIsKeyboardVisible(true);
+            Animated.timing(keyboardHeight, {
+                toValue: -e.endCoordinates.height + 100,
+                duration: 250,
+                useNativeDriver: false,
+            }).start();
+            Animated.timing(buttonBottom, {
+                toValue: e.endCoordinates.height - 130,
+                duration: 250,
+                useNativeDriver: false,
+            }).start();
+        });
         const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
             setIsKeyboardVisible(false);
             Animated.timing(keyboardHeight, {
@@ -109,10 +97,7 @@ const Login = ({ navigation }) => {
             <GoBack nav={navigation}></GoBack>
             {!isKeyboardVisible && (
                 <View>
-                    <Image
-                        source={require("../assets/logo.png")}
-                        style={styles.logo}
-                    />
+                    <Image source={require("../assets/logo.png")} style={styles.logo} />
                 </View>
             )}
             <Text style={styles.title}>관리자 로그인</Text>
@@ -122,24 +107,17 @@ const Login = ({ navigation }) => {
                 value={inputId}
                 onChangeText={(text) => setinputId(text)}
                 autocomplete="off"
-                autoCorrect={false}
-            ></TextInput>
+                autoCorrect={false}></TextInput>
             <Text style={styles.Text}>비밀번호</Text>
             <TextInput
                 style={styles.TextBox}
                 value={inputPw}
                 onChangeText={(text) => setinputPw(text)}
                 autocomplete="off"
-                autoCorrect={false}
-            ></TextInput>
+                autoCorrect={false}></TextInput>
 
-            <Animated.View
-                style={[styles.loginButton, { bottom: buttonBottom }]}
-            >
-                <ShortButton
-                    context="로그인하기"
-                    onPress={handleLogin}
-                ></ShortButton>
+            <Animated.View style={[styles.loginButton, { bottom: buttonBottom }]}>
+                <ShortButton context="로그인하기" onPress={handleLogin}></ShortButton>
             </Animated.View>
         </Animated.View>
     );

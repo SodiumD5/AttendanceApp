@@ -69,7 +69,7 @@ def workstate():
     if request.is_json:
         data = request.get_json()
         response = toSupabase.load_work_record(data)
-        return jsonify({"data" : response}), 200
+        return jsonify(response), 200
 
 @app.route('/post/useHalf', methods=['post'])
 def useHalf():
@@ -77,6 +77,13 @@ def useHalf():
         data = request.get_json()
         toSupabase.record_half_use(data)
         return '', 204
+
+@app.route('/post/restData', methods=['post'])
+def restData():
+    if request.is_json:
+        data = request.get_json()
+        response = toSupabase.load_rest_record(data)
+        return jsonify(response), 200
 
 # 서버 시작
 if __name__ == '__main__':

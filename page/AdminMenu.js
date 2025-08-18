@@ -9,15 +9,16 @@ const AdminMenu = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <AdminHeader menuName="관리자 메뉴"></AdminHeader>
-            <BigButton context="출근부 확인" onPress={() => navigation.push("CheckAttendenceRecord")}></BigButton>
-            <BigButton context="연차대장" onPress={() => navigation.push("AnnualLedger")}></BigButton>
+            <BigButton
+                context="출근부 확인"
+                onPress={() => navigation.push("CheckAttendenceRecord")}></BigButton>
+            <BigButton
+                context="연차대장"
+                onPress={() => navigation.push("AnnualLedger")}></BigButton>
             <BigButton context="교직원 관리" onPress={() => navigation.push("Manage")}></BigButton>
 
             <View style={styles.loginButton}>
-                <ShortButton
-                    context="로그아웃"
-                    onPress={() => navigation.goBack()}
-                ></ShortButton>
+                <ShortButton context="로그아웃" onPress={() => navigation.popToTop()}></ShortButton>
             </View>
         </View>
     );
