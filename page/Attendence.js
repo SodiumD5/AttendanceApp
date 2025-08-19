@@ -8,14 +8,79 @@ import GoBack from "../components/GoBack";
 const Attendence = ({ navigation, route }) => {
     const { employeeName } = route.params;
 
-    const [workState, setWorkState] = useState("");
+    const [workState, setWorkState] = useState("not_work");
     const [datetime, setDatetime] = useState({});
     const [usehalf, setUseHalf] = useState(false);
     const [usefull, setUseFull] = useState(false);
 
+    const changeWorkState = async ({ changedStatus }) => {
+        //버튼 눌렀을 때 출근, 퇴근 바꿔줌
+        setWorkState(changedStatus);
+
+        const now_time = `${datetime.hour}:${datetime.minute}`;
+        const postData = {
+            name: employeeName,
+            year: datetime.year,
+            month: datetime.month,
+            day: datetime.day,
+            time: now_time,
+            status: changedStatus,
+        };
+
+        await fetch("http://10.0.2.2:8000/staff/changing-state", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(postData),
+        });
+    };
+
+    const useRest = async ({ category }) => {
+        //연차, 반차사용을 반영
+        setUseHalf(true);
+        setUseFull(true);
+        if (category == "full") {
+            setWorkState("full");
+        } else {
+            setUseHalf(true);
+        }
+
+        const today = `${datetime.month}:${datetime.day}`;
+        const now_time = `${datetime.hour}:${datetime.minute}`;
+        const postData = {
+            name: employeeName,
+            year: datetime.year,
+            date: today,
+            time: now_time,
+            category: category,
+        };
+        await fetch("http://10.0.2.2:8000/staff/using-rest", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(postData),
+        });
+    };
+
+    const fetchWorkState = async (Datetime) => {
+        //페이지 첫 로딩할 때, 상태 반영
+        try {
+            const url = `http://10.0.2.2:8000/staff/state/?name=${employeeName}&year=${Datetime.year}&month=${Datetime.month}&day=${Datetime.day}`;
+            const response = await fetch(url);
+            const response_body = await response.json();
+
+            setWorkState(response_body[0]["status"]);
+            setUseHalf(response_body[0]["ishalf"]);
+        } catch (e) {
+            console.error("Failed to fetch work state:", e);
+        }
+    };
+
     const fetchDatetime = async () => {
         try {
-            const response = await fetch("http://10.0.2.2:8000/get/datetime");
+            const response = await fetch("http://10.0.2.2:8000/staff/datetime");
             const data = await response.json();
             setDatetime(data);
 
@@ -23,77 +88,6 @@ const Attendence = ({ navigation, route }) => {
         } catch (e) {
             console.error("Failed to fetch datetime:", e);
             return null;
-        }
-    };
-
-    const changeWorkState = async ({ state }) => {
-        setWorkState(state);
-        const current_time = await fetchDatetime();
-        if (!current_time) return;
-
-        const postData = {
-            name: employeeName,
-            time: current_time.current_datetime,
-            isWork: state,
-        };
-
-        const url = "http://10.0.2.2:8000/post/work";
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(postData),
-            });
-        } catch (e) {
-            console.error("Failed to post work data:", e);
-        }
-    };
-
-    const usehalfRest = async () => {
-        setUseHalf(true);
-        const current_time = await fetchDatetime();
-        if (!current_time) return;
-
-        const postData = {
-            name: employeeName,
-            time: current_time.current_datetime,
-        };
-        const url = "http://10.0.2.2:8000/post/useHalf";
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(postData),
-            });
-        } catch (e) {
-            console.error("Failed to post work data:", e);
-        }
-    };
-
-    const fetchWorkState = async (currentDatetime) => {
-        try {
-            const postData = {
-                name: employeeName,
-                time: currentDatetime.current_datetime,
-            };
-            const url = "http://10.0.2.2:8000/post/workstate";
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(postData),
-            });
-            const response_body = await response.json();
-
-            setWorkState(response_body["isWork"]);
-            setUseHalf(response_body["isHalf"]);
-        } catch (e) {
-            console.error("Failed to fetch work state:", e);
         }
     };
 
@@ -108,34 +102,35 @@ const Attendence = ({ navigation, route }) => {
 
         const intervalId = setInterval(() => {
             updateDatetime();
-        }, 1000 * 20);
+        }, 1000 * 10);
 
         return () => clearInterval(intervalId);
     }, []);
 
     useEffect(() => {
-        if (workState === "home" || workState === "full") {
+        if (workState == "not_work") {
+            setUseFull(false);
+        } else {
             setUseFull(true);
         }
-
-        if (usehalf === true) {
-            setUseHalf(true);
-        }
-    }, [workState, usehalf]);
+    }, [workState]);
 
     const commute_button = () => {
-        //notwork, work, full, home
+        //not_work, work, home, full
         if (workState === "work") {
             return (
                 <LongButton
                     context="퇴근하기"
                     bgColor={Colors.primary_green}
-                    onPress={() => changeWorkState({ state: "home" })}
+                    onPress={() => changeWorkState({ changedStatus: "home" })}
                 />
             );
-        } else if (workState === "notwork") {
+        } else if (workState === "not_work") {
             return (
-                <LongButton context="출근하기" onPress={() => changeWorkState({ state: "work" })} />
+                <LongButton
+                    context="출근하기"
+                    onPress={() => changeWorkState({ changedStatus: "work" })}
+                />
             );
         } else {
             return (
@@ -168,7 +163,7 @@ const Attendence = ({ navigation, route }) => {
             <View style={styles.mainButton}>{commute_button()}</View>
 
             <View style={styles.bottomContainer}>
-                <Pressable style={styles.button} onPress={usehalfRest}>
+                <Pressable style={styles.button} onPress={() => useRest({ category: "half" })}>
                     <Text
                         style={[
                             styles.buttonText,
@@ -180,7 +175,7 @@ const Attendence = ({ navigation, route }) => {
                     </Text>
                 </Pressable>
                 <Text style={styles.divider}>|</Text>
-                <Pressable style={styles.button} onPress={() => changeWorkState({ state: "full" })}>
+                <Pressable style={styles.button} onPress={() => useRest({ category: "full" })}>
                     <Text
                         style={[
                             styles.buttonText,

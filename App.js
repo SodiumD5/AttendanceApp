@@ -1,10 +1,7 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, SafeAreaView, View } from "react-native";
+import { StyleSheet } from "react-native";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-
-import Colors from "./components/Colors";
 
 import StartPage from "./page/StartPage";
 import AttendenceList from "./page/AttendenceList";
@@ -23,25 +20,15 @@ export default function App() {
             <NavigationContainer>
                 <Stack.Navigator
                     initialRouteName="StartPage"
-                    screenOptions={{ headerShown: false }}
-                >
+                    screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="StartPage" component={StartPage} />
-                    <Stack.Screen
-                        name="AttendenceList"
-                        component={AttendenceList}
-                    />
+                    <Stack.Screen name="AttendenceList" component={AttendenceList} />
                     <Stack.Screen name="Attendence" component={Attendence} />
                     <Stack.Screen name="Login" component={Login} />
                     <Stack.Screen name="AdminMenu" component={AdminMenu} />
 
-                    <Stack.Screen
-                        name="CheckAttendenceRecord"
-                        component={CheckAttendenceRecord}
-                    />
-                    <Stack.Screen
-                        name="AnnualLedger"
-                        component={AnnualLedger}
-                    />
+                    <Stack.Screen name="CheckAttendenceRecord" component={CheckAttendenceRecord} />
+                    <Stack.Screen name="AnnualLedger" component={AnnualLedger} />
                     <Stack.Screen name="Manage" component={Manage} />
                 </Stack.Navigator>
             </NavigationContainer>

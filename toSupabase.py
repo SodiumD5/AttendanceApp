@@ -18,10 +18,6 @@ def check_pw(user_id, user_pw):
     else:
         return False
 
-def get_staff():
-    response = supabase.table('Employee').select('*').eq('active', True).execute()
-    return response.data
-
 def add_staff(staff_name, enterDay):
     staff_data = supabase.table('Employee').select('*').execute().data
     for staff in staff_data:
@@ -36,114 +32,6 @@ def add_staff(staff_name, enterDay):
     
 def inactive_staff(staff_name):
     supabase.table('Employee').update({'active': False}).eq('name', staff_name).execute()
-
-def check_rest(name, date, isWork):
-    year, month, day = date.split('-')
-    
-    response = supabase.table('RestCount').select('halfRest', 'fullRest') \
-        .eq('name', name).eq('year', year).eq('month', month).execute()
-    record = response.data
-    
-    if not record:
-        insert_data = {
-            'name': name,
-            'year': year,
-            'month': month,
-            'halfRest': 0,
-            'fullRest': 0
-        }
-        supabase.table('RestCount').insert(insert_data).execute()
-        
-        half = 0
-        full = 0
-    else:
-        half = record[0]['halfRest']
-        full = record[0]['fullRest']
-
-    if isWork == 'half':
-        supabase.table('RestCount').update({'halfRest': half+1}) \
-            .eq('name', name).eq('year', year).eq('month', month).execute()
-    else:
-        supabase.table('RestCount').update({'fullRest': full+1}) \
-            .eq('name', name).eq('year', year).eq('month', month).execute()
-
-def record_work(data): #work, home, full만 들어옴
-    name = data['name']
-    isWork = data['isWork']
-    
-    iso = data['time']
-    date, time = iso.split('T')
-    time = time[:8]
-    if isWork == 'full':
-        time = None
-
-    response = supabase.table('Attendence').select('id') \
-        .eq('name', name).eq('date', date).execute()
-    record = response.data
-    
-    if not record:
-        insert_data = {
-            'name' : name, 
-            'date' : date,
-            'workTime' : time, 
-            'isWork' : isWork
-        }
-        response = supabase.table('Attendence') \
-            .insert(insert_data).execute()
-    else:
-        if isWork == "work":
-            update_data = {
-                'workTime': time,
-                'isWork' : isWork
-            }
-        else: #home, full
-            update_data = {
-                'leaveTime': time,
-                'isWork' : isWork
-            }
-        response = supabase.table('Attendence').update(update_data) \
-        .eq('name', name).eq('date', date).execute()
-    
-    if isWork == 'full': #연차의 경우 횟수 카운트
-        check_rest(name, date, 'full')
-        
-def load_work_record(data):
-    name = data['name']
-    iso = data['time']
-    date, time = iso.split('T')
-
-    response = supabase.table('Attendence').select('isWork', 'isHalf') \
-        .eq('name', name).eq('date', date).execute()
-        
-    record = response.data
-    if record:
-        return record[0]
-    else:
-        return {"isWork" : "notwork", "isHalf" : False}
-
-def record_half_use(data):
-    name = data['name']
-    iso = data['time']
-    date, time = iso.split('T')
-    
-    response = supabase.table('Attendence').select('id') \
-        .eq('name', name).eq('date', date).execute()
-    record = response.data
-    if record:
-        supabase.table('Attendence').update({'isHalf' : True}) \
-            .eq('name', name).eq('date', date).execute()
-    else:
-        insert_data = {
-            'name': name,
-            'date': date,
-            'workTime': None,
-            'leaveTime': None,
-            'isWork': 'notwork',
-            'isHalf': True
-        }
-        supabase.table('Attendence').insert(insert_data).execute()
-
-    check_rest(name, date, 'half') #반차 사용 횟수 체크
 
 def load_active_employee():
     active_employee = supabase.table("Employee").select("name") \
