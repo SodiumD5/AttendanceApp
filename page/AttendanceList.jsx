@@ -6,7 +6,7 @@ import Colors from "../components/Colors";
 import RoundButton from "../components/RoundButton";
 import GoBack from "../components/GoBack";
 
-const AttendenceList = ({ navigation }) => {
+const AttendanceList = ({ navigation }) => {
     const [staffInfo, setStaffInfo] = useState();
 
     useEffect(() => {
@@ -42,7 +42,7 @@ const AttendenceList = ({ navigation }) => {
                     <RoundButton
                         context={item.name}
                         onPress={() =>
-                            navigation.push("Attendence", {
+                            navigation.push("Attendance", {
                                 employeeName: item.name,
                             })
                         }
@@ -54,7 +54,7 @@ const AttendenceList = ({ navigation }) => {
     );
 };
 
-export default AttendenceList;
+export default AttendanceList;
 
 const styles = StyleSheet.create({
     container: {

@@ -12,7 +12,7 @@ const StartPage = ({ navigation }) => {
             <View>
                 <Image source={require("../assets/calendar.png")} style={styles.logo} />
             </View>
-            <LongButton context="출근하기" onPress={() => navigation.push("AttendenceList")} />
+            <LongButton context="출근하기" onPress={() => navigation.push("AttendanceList")} />
             <LongButton
                 context="관리자로 로그인"
                 bgColor={Colors.primary_white}

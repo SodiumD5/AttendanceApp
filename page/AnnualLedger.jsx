@@ -15,13 +15,33 @@ const AnnualLedger = ({ navigation }) => {
     const years = Array.from({ length: 76 }, (_, i) => 2025 + i);
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
+    //토큰 만료될 시 로그인 화면으로 튕김
+    const [sessionExpiration, setSessionExpiration] = useState(false);
     const { token } = useTokenStore();
     useEffect(() => {
-        console.log(token);
         if (!token) {
-            navigation.replace("login");
+            setSessionExpiration(true);
         }
     }, [token]);
+    const viewSessionExpiration = () => {
+        return (
+            <AlertModal
+                isVisible={sessionExpiration}
+                setIsVisible={setSessionExpiration}
+                title={"세션이 만료되어 로그아웃 됩니다."}
+                bgColor={Colors.primary_red}
+                onClose={() => {
+                    navigation.reset({
+                        index: 1,
+                        routes: [
+                            {name : 'StartPage'},
+                            {name : 'Login'}
+                        ]
+                    })
+                }}
+            />
+        );
+    };
 
     const handleSearch = async () => {
         const postData = { year: selectedYear, month: selectedMonth };
@@ -152,6 +172,7 @@ const AnnualLedger = ({ navigation }) => {
 
             {renderYearPicker()}
             {renderMonthPicker()}
+            {viewSessionExpiration()}
         </View>
     );
 };

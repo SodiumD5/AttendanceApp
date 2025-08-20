@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 from supabase import create_client
-from pydantic import BaseModel
 load_dotenv()
 
 url = os.environ.get("SUPABASE_URL")

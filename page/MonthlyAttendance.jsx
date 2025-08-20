@@ -5,8 +5,10 @@ import Modal from "react-native-modal";
 import Colors from "../components/Colors";
 import AdminHeader from "../layout/AdminHeader";
 import AlertModal from "../components/AlertModal";
+import axiosInstance from "../api/axios";
+import useTokenStore from "../store/tokenStore";
 
-const MonthlyAttendence = ({ navigation }) => {
+const MonthlyAttendance = ({ navigation }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [selectedUser, setSelectedUser] = useState("직원 선택");
@@ -22,6 +24,28 @@ const MonthlyAttendence = ({ navigation }) => {
     const years = Array.from({ length: 76 }, (_, i) => 2025 + i);
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
+    //토큰 만료될 시 로그인 화면으로 튕김
+    const [sessionExpiration, setSessionExpiration] = useState(false);
+    const { token } = useTokenStore();
+    useEffect(() => {
+        if (!token) {
+            setSessionExpiration(true);
+        }
+    }, [token]);
+    const viewSessionExpiration = () => {
+        return (
+            <AlertModal
+                isVisible={sessionExpiration}
+                setIsVisible={setSessionExpiration}
+                title={"세션이 만료되어 로그아웃 됩니다."}
+                bgColor={Colors.primary_red}
+                onClose={() => {
+                    navigation.replace("Login");
+                }}
+            />
+        );
+    };
+
     useEffect(() => {
         const getUserData = async () => {
             const response = await fetch("http://10.0.2.2:8000/staff/active");
@@ -34,22 +58,12 @@ const MonthlyAttendence = ({ navigation }) => {
 
     const handleSearch = async () => {
         setTitleMessage(`${selectedYear}년 ${selectedMonth}월 ${selectedUser} 출근부`);
-        const postData = {
-            year: selectedYear,
-            month: selectedMonth,
-            name: selectedUser,
-        };
-        const url = "http://10.0.2.2:8000/post/workData";
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(postData),
-        });
-        const response_body = await response.json();
-        console.log(response_body)
-        setSearchResult(response_body);
+
+        const response = await axiosInstance.get(
+            //axiosInstance의 baseurl에 이미 설정 되있어서 앞 날려도 됨.
+            `/attendance/?name=${selectedUser}&year=${selectedYear}&month=${selectedMonth}`
+        );
+        setSearchResult(response.data);
     };
 
     const renderHeader = () => (
@@ -64,9 +78,9 @@ const MonthlyAttendence = ({ navigation }) => {
     const renderItem = ({ item }) => (
         <View style={styles.tableRow}>
             {/* 데이터 구조가 명확하지 않아 임시로 설정함 */}
-            <Text style={styles.rowText}>{item.date || ""}</Text>
-            <Text style={styles.rowText}>{item.workTime || ""}</Text>
-            <Text style={styles.rowText}>{item.leaveTime || ""}</Text>
+            <Text style={styles.rowText}>{item.day || ""}</Text>
+            <Text style={styles.rowText}>{item.work_time || ""}</Text>
+            <Text style={styles.rowText}>{item.leave_time || ""}</Text>
             <Text style={styles.rowText}>{item.rest || ""}</Text>
         </View>
     );
@@ -170,23 +184,17 @@ const MonthlyAttendence = ({ navigation }) => {
             style={styles.bottomModal}>
             <View style={styles.modalView}>
                 <View style={styles.filterRow}>
-                    <Pressable
-                        style={styles.pickerButton}
-                        onPress={() => setShowYearPicker(true)}>
+                    <Pressable style={styles.pickerButton} onPress={() => setShowYearPicker(true)}>
                         <Text style={styles.pickerText}>{selectedYear} 년</Text>
                         <Text style={styles.arrowIcon}>▼</Text>
                     </Pressable>
-                    <Pressable
-                        style={styles.pickerButton}
-                        onPress={() => setShowMonthPicker(true)}>
+                    <Pressable style={styles.pickerButton} onPress={() => setShowMonthPicker(true)}>
                         <Text style={styles.pickerText}>{selectedMonth} 월</Text>
                         <Text style={styles.arrowIcon}>▼</Text>
                     </Pressable>
                 </View>
                 <View style={styles.filterRow}>
-                    <Pressable
-                        style={styles.pickerButton}
-                        onPress={() => setShowUserPicker(true)}>
+                    <Pressable style={styles.pickerButton} onPress={() => setShowUserPicker(true)}>
                         <Text style={styles.pickerText}>{selectedUser}</Text>
                         <Text style={styles.arrowIcon}>▼</Text>
                     </Pressable>
@@ -204,9 +212,7 @@ const MonthlyAttendence = ({ navigation }) => {
                     }}>
                     <Text style={styles.searchButtonText}>검색</Text>
                 </Pressable>
-                <Pressable
-                    style={styles.closeButton}
-                    onPress={() => setShowSearchModal(false)}>
+                <Pressable style={styles.closeButton} onPress={() => setShowSearchModal(false)}>
                     <Text style={styles.textStyle}>닫기</Text>
                 </Pressable>
             </View>
@@ -258,10 +264,11 @@ const MonthlyAttendence = ({ navigation }) => {
             {renderMonthPicker()}
             {renderUserPicker()}
             {showAlertModal && renderAlert()}
+            {viewSessionExpiration()}
         </View>
     );
 };
-export default MonthlyAttendence;
+export default MonthlyAttendance;
 
 const styles = StyleSheet.create({
     container: {

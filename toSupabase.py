@@ -62,7 +62,7 @@ def load_work_data(data):
         daylength[2] -= 1
     endDate = datetime.date(year, month, daylength[month])
  
-    response = supabase.table("Attendence").select("*").eq("name", name) \
+    response = supabase.table("Attendance").select("*").eq("name", name) \
         .gte('date', startDate).lte('date', endDate).order("date").execute()
     records = response.data
     

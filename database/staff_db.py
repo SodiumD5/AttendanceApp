@@ -27,7 +27,7 @@ def change_work_home(data:StaffState): #work, home만 들어옴
     time = data.time
     status = data.status
 
-    record = supabase.table('attendence').select('id') \
+    record = supabase.table('Attendance').select('id') \
         .eq('name', name).eq('year', year).eq('month', month).eq('day', day).execute().data
     
     if not record: #기록이 없으면 무조건 not_work상태임
@@ -39,7 +39,7 @@ def change_work_home(data:StaffState): #work, home만 들어옴
             'work_time' : time, 
             'status' : status
         }
-        supabase.table('attendence') \
+        supabase.table('Attendance') \
             .insert(insert_data).execute()
     else: 
         if status == "work": #반차(행 생성)->출근->퇴근
@@ -52,18 +52,18 @@ def change_work_home(data:StaffState): #work, home만 들어옴
                 'leave_time': time,
                 'status' : status
             }
-        supabase.table('attendence').update(update_data) \
+        supabase.table('Attendance').update(update_data) \
             .eq('name', name).eq('year', year).eq('month', month).eq('day', day).execute()
 
 def find_today_state(name, year, month, day):
-    record = supabase.table('attendence').select("status") \
+    record = supabase.table('Attendance').select("status") \
         .eq('name', name).eq('year', year).eq('month', month).eq('day', day).execute().data
     
     if not record:
         return {'status' : 'not_work', 'ishalf' : False}
     else:
         today_state = record[0]['status']
-        today = f"{month}:{day}"
+        today = f"{month}/{day}"
         record = supabase.table('rest').select("category") \
         .eq('name', name).eq('year', year).eq('date', today).execute().data
 
@@ -83,7 +83,7 @@ def record_rest(data: RestData):
     supabase.table('rest').insert(data_dict).execute()
     
     if data.category == 'full': #연차의 경우 행이 없음
-        month, day = map(int, data.date.split(":"))
+        month, day = map(int, data.date.split("/"))
         insert_data = {
             "name":data.name,
             "year":data.year,
@@ -91,4 +91,4 @@ def record_rest(data: RestData):
             "day":day,
             "status":"full"
         }
-        supabase.table('attendence').insert(insert_data).execute()
+        supabase.table('Attendance').insert(insert_data).execute()

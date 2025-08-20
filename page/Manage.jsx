@@ -7,6 +7,7 @@ import Colors from "../components/Colors";
 import AdminHeader from "../layout/AdminHeader";
 import StaffCard from "../components/StaffCard";
 import AlertModal from "../components/AlertModal";
+import useTokenStore from "../store/tokenStore";
 
 const Manage = ({ navigation }) => {
     const [staffInfo, setStaffInfo] = useState([]);
@@ -17,6 +18,34 @@ const Manage = ({ navigation }) => {
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
     const [confirmMessage, setConfirmMessage] = useState("");
     const [refresh, setRefresh] = useState(0);
+
+    //토큰 만료될 시 로그인 화면으로 튕김
+    const [sessionExpiration, setSessionExpiration] = useState(false);
+    const { token } = useTokenStore();
+    useEffect(() => {
+        if (!token) {
+            setSessionExpiration(true);
+        }
+    }, [token]);
+    const viewSessionExpiration = () => {
+        return (
+            <AlertModal
+                isVisible={sessionExpiration}
+                setIsVisible={setSessionExpiration}
+                title={"세션이 만료되어 로그아웃 됩니다."}
+                bgColor={Colors.primary_red}
+                onClose={() => {
+                    navigation.reset({
+                        index: 1,
+                        routes: [
+                            {name : 'StartPage'},
+                            {name : 'Login'}
+                        ]
+                    })
+                }}
+            />
+        );
+    };
 
     useEffect(() => {
         const getStaffList = async () => {
@@ -164,6 +193,7 @@ const Manage = ({ navigation }) => {
             />
 
             {renderAlert()}
+            {viewSessionExpiration()}
         </View>
     );
 };

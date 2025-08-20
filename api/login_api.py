@@ -14,11 +14,10 @@ ALGORITHM = "HS256"
 router = APIRouter()
 
 def create_access_token(data: dict, expires_delta: timedelta):
-    to_encode = data.copy()
     expire = datetime.now(timezone.utc) + expires_delta
     
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    data.update({"exp": expire})
+    encoded_jwt = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 class Packet(BaseModel):
@@ -47,7 +46,7 @@ def info(packet:Packet):
         )
     
     access_token = create_access_token(
-        data={"sub": id}, expires_delta=timedelta(seconds=5) #만료 시간 테스트 해야함. 
+        data={"sub": id}, expires_delta=timedelta(minutes=20) #만료 시간 테스트 해야함. 
     )
     return {"access_token": access_token}
     

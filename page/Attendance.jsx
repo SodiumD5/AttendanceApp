@@ -5,7 +5,7 @@ import Colors from "../components/Colors";
 import LongButton from "../components/LongButton";
 import GoBack from "../components/GoBack";
 
-const Attendence = ({ navigation, route }) => {
+const Attendance = ({ navigation, route }) => {
     const { employeeName } = route.params;
 
     const [workState, setWorkState] = useState("not_work");
@@ -190,7 +190,7 @@ const Attendence = ({ navigation, route }) => {
         </View>
     );
 };
-export default Attendence;
+export default Attendance;
 
 const styles = StyleSheet.create({
     container: {

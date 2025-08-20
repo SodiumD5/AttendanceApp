@@ -2,13 +2,18 @@ import Modal from "react-native-modal";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import Colors from "./Colors";
 
-const AlertModal = ({ isVisible, setIsVisible, title, bgColor }) => {
+const AlertModal = ({ isVisible, setIsVisible, title, bgColor, onClose = () => {} }) => {
     const close = () => {
         setIsVisible(!isVisible);
     };
 
     return (
-        <Modal isVisible={isVisible} onBackdropPress={close}>
+        <Modal
+            isVisible={isVisible}
+            onBackdropPress={() => {
+                close();
+                onClose();
+            }}>
             <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}>{title}</Text>
                 <TouchableOpacity
@@ -16,7 +21,10 @@ const AlertModal = ({ isVisible, setIsVisible, title, bgColor }) => {
                         ...styles.modalButton,
                         backgroundColor: bgColor,
                     }}
-                    onPress={close}>
+                    onPress={() => {
+                        close();
+                        onClose();
+                    }}>
                     <Text style={styles.modalButtonText}>확인</Text>
                 </TouchableOpacity>
             </View>
