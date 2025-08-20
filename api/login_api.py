@@ -1,16 +1,53 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
+from pydantic import BaseModel
+from jose import jwt
 from database import login_db
+from datetime import datetime, timedelta, timezone
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+SECRET_KEY = os.environ.get('SECRET_KEY')
+ALGORITHM = "HS256"
 
 router = APIRouter()
 
-@router.get('/info')
-def info():
-    pass
-    # if request.is_json:
-    #     data = request.get_json()
+def create_access_token(data: dict, expires_delta: timedelta):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + expires_delta
+    
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+class Packet(BaseModel):
+    id : str
+    pw : str
+@router.post('/info', status_code=200)
+def info(packet:Packet):
+    import bcrypt
+    id = packet.id
+    pw = packet.pw
+    
+    get_hash = login_db.get_hash()
+    
+    user_found = False
+    for user in get_hash:
+        user_id = user['user_id'].encode('utf-8')
+        user_pw = user['user_pw'].encode('utf-8')
         
-    #     loginStatus = toSupabase.check_pw(data['id'], data['pw'])
-    #     if loginStatus:
-    #         return jsonify({"message": "Login successfully!"}), 200
-    #     else:
-    #         return jsonify({"message": "wrong data!"}), 400
+        if bcrypt.checkpw(id.encode('utf-8'), user_id) and bcrypt.checkpw(pw.encode('utf-8'), user_pw):
+            user_found = True
+            
+    if not user_found:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+        )
+    
+    access_token = create_access_token(
+        data={"sub": id}, expires_delta=timedelta(seconds=5) #만료 시간 테스트 해야함. 
+    )
+    return {"access_token": access_token}
+    

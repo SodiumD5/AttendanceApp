@@ -2,10 +2,9 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from database import staff_db
 
-
 router = APIRouter()
 
-@router.get('/datetime')
+@router.get('/datetime', status_code=200)
 def datetime():
     from datetime import datetime
     now = datetime.now()
@@ -21,7 +20,7 @@ def datetime():
     }
     return response
 
-@router.get('/active')
+@router.get('/active', status_code=200)
 def active():
     return staff_db.active_staff()
 
@@ -32,15 +31,14 @@ class StaffState(BaseModel):
     day: int
     time: str
     status: str
-@router.post('/changing-state')
+@router.post('/changing-state', status_code=204)
 def changing_state(staff_state:StaffState):
     staff_db.change_work_home(staff_state)
-    return '', 204
 
-@router.get('/state/')
+@router.get('/state/', status_code=200)
 def state(name:str, year:int, month:int, day:int):
     now_state = staff_db.find_today_state(name, year, month, day)
-    return now_state, 204
+    return now_state
 
 class RestData(BaseModel):
     name: str
@@ -48,7 +46,6 @@ class RestData(BaseModel):
     date: str
     time: str
     category: str
-@router.post('/using-rest')
+@router.post('/using-rest', status_code=204)
 def using_rest(restdata:RestData):
     staff_db.record_rest(restdata)
-    return '', 204

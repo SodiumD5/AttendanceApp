@@ -1,5 +1,5 @@
 import { StyleSheet, View, Text, Pressable } from "react-native";
-import Colors from "../components/Colors";
+import Colors from "./Colors";
 
 export default function RoundButton({ context, wrapperStyle, textStyle, onPress }) {
     return (

@@ -6,7 +6,7 @@ import Colors from "../components/Colors";
 import AdminHeader from "../layout/AdminHeader";
 import AlertModal from "../components/AlertModal";
 
-const CheckAttendenceRecord = ({ navigation }) => {
+const MonthlyAttendence = ({ navigation }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [selectedUser, setSelectedUser] = useState("직원 선택");
@@ -24,7 +24,7 @@ const CheckAttendenceRecord = ({ navigation }) => {
 
     useEffect(() => {
         const getUserData = async () => {
-            const response = await fetch("http://10.0.2.2:8000/get/active");
+            const response = await fetch("http://10.0.2.2:8000/staff/active");
             const users = await response.json();
             setUserList(users);
         };
@@ -141,18 +141,18 @@ const CheckAttendenceRecord = ({ navigation }) => {
             <View style={styles.pickerModal}>
                 <FlatList
                     data={userlist}
-                    keyExtractor={(item) => item.toString()}
+                    keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
                         <Pressable
                             style={[
                                 styles.pickerItem,
-                                item === selectedUser && styles.pickerItemActive,
+                                item.name === selectedUser && styles.pickerItemActive,
                             ]}
                             onPress={() => {
-                                setSelectedUser(item);
+                                setSelectedUser(item.name);
                                 setShowUserPicker(false);
                             }}>
-                            <Text style={styles.pickerItemText}>{item}</Text>
+                            <Text style={styles.pickerItemText}>{item.name}</Text>
                         </Pressable>
                     )}
                     bounces={false}
@@ -227,7 +227,7 @@ const CheckAttendenceRecord = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <AdminHeader nav={navigation} menuName="출근부 확인"></AdminHeader>
+            <AdminHeader nav={navigation} menuName="월간 출근부"></AdminHeader>
 
             <View style={styles.titleContainer}>
                 <Text style={styles.titleText}>{titleMessage}</Text>
@@ -261,8 +261,7 @@ const CheckAttendenceRecord = ({ navigation }) => {
         </View>
     );
 };
-
-export default CheckAttendenceRecord;
+export default MonthlyAttendence;
 
 const styles = StyleSheet.create({
     container: {

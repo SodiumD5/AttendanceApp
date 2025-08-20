@@ -5,6 +5,7 @@ import Colors from "../components/Colors";
 
 import ShortButton from "../components/ShortButton";
 import GoBack from "../components/GoBack";
+import useTokenStore from "../store/tokenStore";
 
 const wrong_pw = () => {
     Alert.alert("비밀번호가 틀렸습니다.");
@@ -18,6 +19,7 @@ const Login = ({ navigation }) => {
     const buttonBottom = useRef(new Animated.Value(70)).current;
 
     const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+    const { token, setToken } = useTokenStore();
 
     const handleLogin = async () => {
         const loginInfo = {
@@ -26,7 +28,7 @@ const Login = ({ navigation }) => {
         };
 
         try {
-            const url = "http://10.0.2.2:8000/post/loginInfo";
+            const url = "http://10.0.2.2:8000/login/info";
             const response = await fetch(url, {
                 method: "POST",
                 headers: {
@@ -34,14 +36,16 @@ const Login = ({ navigation }) => {
                 },
                 body: JSON.stringify(loginInfo),
             });
-            console.log("send success!");
 
-            const result = await response.json();
-
-            if (response.status == 400) {
+            const responseMessage = await response.json();
+            if (!responseMessage.access_token) {
+                setToken(null);
                 wrong_pw();
             } else {
-                navigation.push("AdminMenu");
+                setToken(responseMessage.access_token);
+                navigation.push("AdminMenu", {
+                    token: responseMessage.access_token,
+                });
             }
             setinputId("");
             setinputPw("");

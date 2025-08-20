@@ -8,7 +8,7 @@ import AttendenceList from "./page/AttendenceList";
 import Attendence from "./page/Attendence";
 import Login from "./page/Login";
 import AdminMenu from "./page/AdminMenu";
-import CheckAttendenceRecord from "./page/CheckAttendenceRecord";
+import MonthlyAttendence from "./page/MonthlyAttendence";
 import AnnualLedger from "./page/AnnualLedger";
 import Manage from "./page/Manage";
 
@@ -27,7 +27,7 @@ export default function App() {
                     <Stack.Screen name="Login" component={Login} />
                     <Stack.Screen name="AdminMenu" component={AdminMenu} />
 
-                    <Stack.Screen name="CheckAttendenceRecord" component={CheckAttendenceRecord} />
+                    <Stack.Screen name="MonthlyAttendence" component={MonthlyAttendence} />
                     <Stack.Screen name="AnnualLedger" component={AnnualLedger} />
                     <Stack.Screen name="Manage" component={Manage} />
                 </Stack.Navigator>

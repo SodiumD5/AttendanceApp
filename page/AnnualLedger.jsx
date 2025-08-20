@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Pressable, FlatList, Modal } from "react-native";
 
 import Colors from "../components/Colors";
 import AdminHeader from "../layout/AdminHeader";
+import useTokenStore from "../store/tokenStore";
 
 const AnnualLedger = ({ navigation }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -13,6 +14,14 @@ const AnnualLedger = ({ navigation }) => {
 
     const years = Array.from({ length: 76 }, (_, i) => 2025 + i);
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+    const { token } = useTokenStore();
+    useEffect(() => {
+        console.log(token);
+        if (!token) {
+            navigation.replace("login");
+        }
+    }, [token]);
 
     const handleSearch = async () => {
         const postData = { year: selectedYear, month: selectedMonth };
