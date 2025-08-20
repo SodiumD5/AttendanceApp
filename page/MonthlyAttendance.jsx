@@ -11,15 +11,15 @@ import useTokenStore from "../store/tokenStore";
 const MonthlyAttendance = ({ navigation }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-    const [selectedUser, setSelectedUser] = useState("직원 선택");
+    const [selectedStaff, setSelectedStaff] = useState("직원 선택");
+    const [stafflist, setStaffList] = useState([]);
     const [searchResult, setSearchResult] = useState([]);
     const [showYearPicker, setShowYearPicker] = useState(false);
     const [showMonthPicker, setShowMonthPicker] = useState(false);
-    const [showUserPicker, setShowUserPicker] = useState(false);
+    const [showStaffPicker, setShowStaffPicker] = useState(false);
     const [showSearchModal, setShowSearchModal] = useState(false);
     const [titleMessage, setTitleMessage] = useState("검색조건을 설정해주세요");
     const [showAlertModal, setShowAlertModal] = useState(false);
-    const [userlist, setUserList] = useState([]);
 
     const years = Array.from({ length: 76 }, (_, i) => 2025 + i);
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -47,21 +47,21 @@ const MonthlyAttendance = ({ navigation }) => {
     };
 
     useEffect(() => {
-        const getUserData = async () => {
+        const getStaffData = async () => {
             const response = await fetch("http://10.0.2.2:8000/staff/active");
-            const users = await response.json();
-            setUserList(users);
+            const staff = await response.json();
+            setStaffList(staff);
         };
 
-        getUserData();
+        getStaffData();
     }, []);
 
     const handleSearch = async () => {
-        setTitleMessage(`${selectedYear}년 ${selectedMonth}월 ${selectedUser} 출근부`);
+        setTitleMessage(`${selectedYear}년 ${selectedMonth}월 ${selectedStaff} 출근부`);
 
         const response = await axiosInstance.get(
             //axiosInstance의 baseurl에 이미 설정 되있어서 앞 날려도 됨.
-            `/attendance/?name=${selectedUser}&year=${selectedYear}&month=${selectedMonth}`
+            `/attendance/?name=${selectedStaff}&year=${selectedYear}&month=${selectedMonth}`
         );
         setSearchResult(response.data);
     };
@@ -71,17 +71,26 @@ const MonthlyAttendance = ({ navigation }) => {
             <Text style={styles.headerText}>날짜</Text>
             <Text style={styles.headerText}>출근 시각</Text>
             <Text style={styles.headerText}>퇴근 시각</Text>
-            <Text style={styles.headerText}>연차/반차</Text>
+            <Text style={styles.headerText}>휴가</Text>
         </View>
     );
 
+    const restText = (rest) => {
+        if (rest === "half") {
+            return "반차";
+        } else if (rest === "full") {
+            return "연차";
+        } else {
+            return "X";
+        }
+    };
+
     const renderItem = ({ item }) => (
         <View style={styles.tableRow}>
-            {/* 데이터 구조가 명확하지 않아 임시로 설정함 */}
-            <Text style={styles.rowText}>{item.day || ""}</Text>
-            <Text style={styles.rowText}>{item.work_time || ""}</Text>
-            <Text style={styles.rowText}>{item.leave_time || ""}</Text>
-            <Text style={styles.rowText}>{item.rest || ""}</Text>
+            <Text style={styles.rowText}>{item.day || "X"}</Text>
+            <Text style={styles.rowText}>{item.work_time || "X"}</Text>
+            <Text style={styles.rowText}>{item.leave_time || "X"}</Text>
+            <Text style={styles.rowText}>{restText(item.rest)}</Text>
         </View>
     );
 
@@ -145,26 +154,26 @@ const MonthlyAttendance = ({ navigation }) => {
         </Modal>
     );
 
-    const renderUserPicker = () => (
+    const renderStaffPicker = () => (
         <Modal
-            isVisible={showUserPicker}
-            onBackdropPress={() => setShowUserPicker(false)}
-            onSwipeComplete={() => setShowUserPicker(false)}
+            isVisible={showStaffPicker}
+            onBackdropPress={() => setShowStaffPicker(false)}
+            onSwipeComplete={() => setShowStaffPicker(false)}
             swipeDirection={["down"]}
             style={styles.bottomModal}>
             <View style={styles.pickerModal}>
                 <FlatList
-                    data={userlist}
+                    data={stafflist}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
                         <Pressable
                             style={[
                                 styles.pickerItem,
-                                item.name === selectedUser && styles.pickerItemActive,
+                                item.name === selectedStaff && styles.pickerItemActive,
                             ]}
                             onPress={() => {
-                                setSelectedUser(item.name);
-                                setShowUserPicker(false);
+                                setSelectedStaff(item.name);
+                                setShowStaffPicker(false);
                             }}>
                             <Text style={styles.pickerItemText}>{item.name}</Text>
                         </Pressable>
@@ -194,15 +203,15 @@ const MonthlyAttendance = ({ navigation }) => {
                     </Pressable>
                 </View>
                 <View style={styles.filterRow}>
-                    <Pressable style={styles.pickerButton} onPress={() => setShowUserPicker(true)}>
-                        <Text style={styles.pickerText}>{selectedUser}</Text>
+                    <Pressable style={styles.pickerButton} onPress={() => setShowStaffPicker(true)}>
+                        <Text style={styles.pickerText}>{selectedStaff}</Text>
                         <Text style={styles.arrowIcon}>▼</Text>
                     </Pressable>
                 </View>
                 <Pressable
                     style={styles.searchButton}
                     onPress={() => {
-                        if (selectedUser === "직원 선택") {
+                        if (selectedStaff === "직원 선택") {
                             setShowSearchModal(false);
                             setShowAlertModal(true);
                         } else {
@@ -262,7 +271,7 @@ const MonthlyAttendance = ({ navigation }) => {
             {renderSearchModal()}
             {renderYearPicker()}
             {renderMonthPicker()}
-            {renderUserPicker()}
+            {renderStaffPicker()}
             {showAlertModal && renderAlert()}
             {viewSessionExpiration()}
         </View>

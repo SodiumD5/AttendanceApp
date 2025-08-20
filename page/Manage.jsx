@@ -8,6 +8,7 @@ import AdminHeader from "../layout/AdminHeader";
 import StaffCard from "../components/StaffCard";
 import AlertModal from "../components/AlertModal";
 import useTokenStore from "../store/tokenStore";
+import axiosInstance from "../api/axios";
 
 const Manage = ({ navigation }) => {
     const [staffInfo, setStaffInfo] = useState([]);
@@ -50,7 +51,7 @@ const Manage = ({ navigation }) => {
     useEffect(() => {
         const getStaffList = async () => {
             try {
-                const response = await fetch("http://10.0.2.2:8000/get/staffList");
+                const response = await fetch("http://10.0.2.2:8000/staff/active");
                 const info = await response.json();
                 setStaffInfo(info);
             } catch (e) {
@@ -90,22 +91,10 @@ const Manage = ({ navigation }) => {
 
         var enterDay = registerDay.toISOString().split("T")[0];
 
-        const postData = { name: newStaffName, registerDay: enterDay };
-        const url = "http://10.0.2.2:8000/post/addStaff";
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(postData),
-        });
-
-        const response_body = await response.json();
-        const confirm = {
-            message: response_body.message,
-            status: response.status,
-        };
-        setConfirmMessage(confirm);
+        const postData = { staff_name: newStaffName, enroll_date: enterDay };
+        const url = '/enrollment';
+        const response = await axiosInstance.post(url, postData);
+        setConfirmMessage(response.data);
 
         toggleModal();
         toggleConfirm();
@@ -124,7 +113,7 @@ const Manage = ({ navigation }) => {
 
     const renderAlert = () => {
         let bgColor;
-        if (confirmMessage.status === 400) {
+        if (confirmMessage === "이미 존재하는 이름입니다.") {
             bgColor = Colors.primary_red;
         } else {
             bgColor = Colors.primary_purple;
@@ -133,7 +122,7 @@ const Manage = ({ navigation }) => {
             <AlertModal
                 isVisible={isConfirmVisible}
                 setIsVisible={setIsConfirmVisible}
-                title={confirmMessage.message}
+                title={confirmMessage}
                 bgColor={bgColor}></AlertModal>
         );
     };

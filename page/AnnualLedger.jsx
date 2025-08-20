@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Pressable, FlatList, Modal } from "react-native";
+import { StyleSheet, View, Text, Pressable, FlatList } from "react-native";
+import Modal from "react-native-modal";
 
 import Colors from "../components/Colors";
 import AdminHeader from "../layout/AdminHeader";
 import useTokenStore from "../store/tokenStore";
+import AlertModal from "../components/AlertModal";
+import axiosInstance from "../api/axios";
 
 const AnnualLedger = ({ navigation }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-    const [searchResult, setSearchResult] = useState([]);
+    const [selectedStaff, setSelectedStaff] = useState("직원 선택");
+    const [stafflist, setStaffList] = useState([]);
+    const [restData, setRestData] = useState([]);
     const [showYearPicker, setShowYearPicker] = useState(false);
-    const [showMonthPicker, setShowMonthPicker] = useState(false);
+    const [showStaffPicker, setShowStaffPicker] = useState(false);
 
     const years = Array.from({ length: 76 }, (_, i) => 2025 + i);
-    const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
     //토큰 만료될 시 로그인 화면으로 튕김
     const [sessionExpiration, setSessionExpiration] = useState(false);
@@ -33,105 +36,101 @@ const AnnualLedger = ({ navigation }) => {
                 onClose={() => {
                     navigation.reset({
                         index: 1,
-                        routes: [
-                            {name : 'StartPage'},
-                            {name : 'Login'}
-                        ]
-                    })
+                        routes: [{ name: "StartPage" }, { name: "Login" }],
+                    });
                 }}
             />
         );
     };
 
+    useEffect(() => {
+        const getStaffData = async () => {
+            const response = await fetch("http://10.0.2.2:8000/staff/active");
+            const staff = await response.json();
+            setStaffList(staff);
+        };
+
+        getStaffData();
+    }, []);
+
     const handleSearch = async () => {
-        const postData = { year: selectedYear, month: selectedMonth };
-        const url = "http://10.0.2.2:8000/post/restData";
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(postData),
-        });
-        const response_body = await response.json();
-        setSearchResult(response_body);
+        const url = `/rest/${selectedStaff}/${selectedYear}`;
+        const response = await axiosInstance.get(url);
+        setRestData(response.data);
     };
 
     const renderHeader = () => (
         <View style={styles.tableHeader}>
-            <Text style={styles.headerText}>이름</Text>
-            <Text style={styles.headerText}>반차 사용</Text>
-            <Text style={styles.headerText}>연차 사용</Text>
+            <Text style={styles.headerText}>사용횟수</Text>
+            <Text style={styles.headerText}>날짜</Text>
+            <Text style={styles.headerText}>사용시각</Text>
         </View>
     );
 
-    const renderItem = ({ item }) => (
-        <View style={styles.tableRow}>
-            <Text style={styles.rowText}>{item.name}</Text>
-            <Text style={styles.rowText}>{item.halfRest}</Text>
-            <Text style={styles.rowText}>{item.fullRest}</Text>
-        </View>
-    );
+    //휴가 횟수 카운트 하기
+    const renderItem = ({ item }) => {
+        return (
+            <View style={styles.tableRow}>
+                <Text style={styles.rowText}>{item.count}</Text>
+                <Text style={styles.rowText}>{item.date}</Text>
+                <Text style={styles.rowText}>{item.time}</Text>
+            </View>
+        );
+    };
 
     const renderYearPicker = () => (
         <Modal
-            transparent={true}
-            animationType="slide"
-            visible={showYearPicker}
-            onRequestClose={() => setShowYearPicker(false)}>
-            <Pressable style={styles.modalOverlay} onPress={() => setShowYearPicker(false)}>
-                <View style={styles.pickerModal}>
-                    <FlatList
-                        data={years}
-                        keyExtractor={(item) => item.toString()}
-                        renderItem={({ item }) => (
-                            <Pressable
-                                style={[
-                                    styles.pickerItem,
-                                    item === selectedYear && styles.pickerItemActive,
-                                ]}
-                                onPress={() => {
-                                    setSelectedYear(item);
-                                    setShowYearPicker(false);
-                                }}>
-                                <Text style={styles.pickerItemText}>{item}</Text>
-                            </Pressable>
-                        )}
-                        bounces={false}
-                    />
-                </View>
-            </Pressable>
+            isVisible={showYearPicker}
+            onBackdropPress={() => setShowYearPicker(false)}
+            style={styles.Modal}>
+            <View style={styles.pickerModal}>
+                <FlatList
+                    data={years}
+                    keyExtractor={(item) => item.toString()}
+                    renderItem={({ item }) => (
+                        <Pressable
+                            style={[
+                                styles.pickerItem,
+                                item === selectedYear && styles.pickerItemActive,
+                            ]}
+                            onPress={() => {
+                                setSelectedYear(item);
+                                setShowYearPicker(false);
+                            }}>
+                            <Text style={styles.pickerItemText}>{item}</Text>
+                        </Pressable>
+                    )}
+                    bounces={false}
+                />
+            </View>
         </Modal>
     );
 
-    const renderMonthPicker = () => (
+    const renderStaffPicker = () => (
         <Modal
-            transparent={true}
-            animationType="slide"
-            visible={showMonthPicker}
-            onRequestClose={() => setShowMonthPicker(false)}>
-            <Pressable style={styles.modalOverlay} onPress={() => setShowMonthPicker(false)}>
-                <View style={styles.pickerModal}>
-                    <FlatList
-                        data={months}
-                        keyExtractor={(item) => item.toString()}
-                        renderItem={({ item }) => (
-                            <Pressable
-                                style={[
-                                    styles.pickerItem,
-                                    item === selectedMonth && styles.pickerItemActive,
-                                ]}
-                                onPress={() => {
-                                    setSelectedMonth(item);
-                                    setShowMonthPicker(false);
-                                }}>
-                                <Text style={styles.pickerItemText}>{item}</Text>
-                            </Pressable>
-                        )}
-                        bounces={false}
-                    />
-                </View>
-            </Pressable>
+            isVisible={showStaffPicker}
+            onBackdropPress={() => setShowStaffPicker(false)}
+            style={styles.Modal}>
+            <View style={styles.pickerModal}>
+                <FlatList
+                    data={stafflist}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <Pressable
+                            style={[
+                                styles.pickerItem,
+                                item === selectedStaff && styles.pickerItemActive,
+                            ]}
+                            onPress={() => {
+                                setSelectedStaff(item.name);
+                                setShowStaffPicker(false);
+                            }}>
+                            <Text style={styles.pickerItemText}>{item.name}</Text>
+                        </Pressable>
+                    )}
+                    bounces={false}
+                />
+            </View>
         </Modal>
     );
 
@@ -148,11 +147,10 @@ const AnnualLedger = ({ navigation }) => {
                     <Text style={styles.pickerLabel}> 년</Text>
                 </View>
                 <View style={styles.pickerWrapper}>
-                    <Pressable style={styles.pickerButton} onPress={() => setShowMonthPicker(true)}>
-                        <Text style={styles.pickerText}>{selectedMonth}</Text>
+                    <Pressable style={styles.pickerButton} onPress={() => setShowStaffPicker(true)}>
+                        <Text style={styles.pickerText}>{selectedStaff}</Text>
                         <Text style={styles.arrowIcon}>▼</Text>
                     </Pressable>
-                    <Text style={styles.pickerLabel}> 월</Text>
                 </View>
                 <Pressable style={styles.searchButton} onPress={handleSearch}>
                     <Text style={styles.searchButtonText}>검색</Text>
@@ -160,7 +158,7 @@ const AnnualLedger = ({ navigation }) => {
             </View>
 
             <FlatList
-                data={searchResult}
+                data={restData}
                 keyExtractor={(item) => item.id}
                 ListHeaderComponent={renderHeader}
                 renderItem={renderItem}
@@ -171,12 +169,11 @@ const AnnualLedger = ({ navigation }) => {
             />
 
             {renderYearPicker()}
-            {renderMonthPicker()}
+            {renderStaffPicker()}
             {viewSessionExpiration()}
         </View>
     );
 };
-
 export default AnnualLedger;
 
 const styles = StyleSheet.create({
@@ -284,12 +281,6 @@ const styles = StyleSheet.create({
         color: Colors.text_gray,
         fontWeight: "bold",
     },
-    modalOverlay: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-    },
     pickerModal: {
         backgroundColor: Colors.primary_white,
         borderRadius: 10,
@@ -307,5 +298,11 @@ const styles = StyleSheet.create({
     },
     pickerItemActive: {
         backgroundColor: Colors.primary_gray,
+    },
+    Modal: {
+        justifyContent: "center",
+        margin: 0,
+        justifyContent: "center",
+        alignItems: "center",
     },
 });

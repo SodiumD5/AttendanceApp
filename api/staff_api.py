@@ -11,6 +11,7 @@ def datetime():
 
     response = {
         "current_datetime": now.isoformat(),
+        "date": f"{now.year}-{now.month}-{now.day}",
         "year": now.year,
         "month": now.month,
         "day": now.day,
@@ -42,9 +43,8 @@ def state(name:str, year:int, month:int, day:int):
 
 class RestData(BaseModel):
     name: str
-    year: int
     date: str
-    time: str
+    time: str | None
     category: str
 @router.post('/using-rest', status_code=204)
 def using_rest(restdata:RestData):

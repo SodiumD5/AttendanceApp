@@ -46,13 +46,11 @@ const Attendance = ({ navigation, route }) => {
             setUseHalf(true);
         }
 
-        const today = `${datetime.month}:${datetime.day}`;
         const now_time = `${datetime.hour}:${datetime.minute}`;
         const postData = {
             name: employeeName,
-            year: datetime.year,
-            date: today,
-            time: now_time,
+            date: datetime.date,
+            time: category == "half" ? now_time : null,
             category: category,
         };
         await fetch("http://10.0.2.2:8000/staff/using-rest", {
@@ -70,9 +68,9 @@ const Attendance = ({ navigation, route }) => {
             const url = `http://10.0.2.2:8000/staff/state/?name=${employeeName}&year=${Datetime.year}&month=${Datetime.month}&day=${Datetime.day}`;
             const response = await fetch(url);
             const response_body = await response.json();
-
-            setWorkState(response_body[0]["status"]);
-            setUseHalf(response_body[0]["ishalf"]);
+            
+            setWorkState(response_body["status"]);
+            setUseHalf(response_body["ishalf"]);
         } catch (e) {
             console.error("Failed to fetch work state:", e);
         }

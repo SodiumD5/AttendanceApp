@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import Modal from "react-native-modal";
+import axiosInstance from "../api/axios";
 
 export default function StaffCard({ name, date, refresh }) {
     const [deleteVisible, setDeleteVisible] = useState(false);
@@ -11,14 +12,8 @@ export default function StaffCard({ name, date, refresh }) {
     };
 
     const handleDelete = async () => {
-        const url = "http://10.0.2.2:8000/post/inactive";
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(name),
-        });
+        const url = `${name}/deactivate`;
+        await axiosInstance.put(url);
         refresh((prevRefresh) => prevRefresh + 1);
         toggleConfirm();
     };

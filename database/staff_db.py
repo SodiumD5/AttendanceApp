@@ -9,7 +9,7 @@ key = os.environ.get("SUPABASE_KEY")
 supabase = create_client(url, key)
 
 def active_staff():
-    response = supabase.table('employee').select('*').eq('active', True).execute().data
+    response = supabase.table('employee').select('*').eq('active', True).order('registerDay').execute().data
     return response
 
 class StaffState(BaseModel):
@@ -27,7 +27,7 @@ def change_work_home(data:StaffState): #work, home만 들어옴
     time = data.time
     status = data.status
 
-    record = supabase.table('Attendance').select('id') \
+    record = supabase.table('attendance').select('id') \
         .eq('name', name).eq('year', year).eq('month', month).eq('day', day).execute().data
     
     if not record: #기록이 없으면 무조건 not_work상태임
@@ -39,7 +39,7 @@ def change_work_home(data:StaffState): #work, home만 들어옴
             'work_time' : time, 
             'status' : status
         }
-        supabase.table('Attendance') \
+        supabase.table('attendance') \
             .insert(insert_data).execute()
     else: 
         if status == "work": #반차(행 생성)->출근->퇴근
@@ -52,20 +52,20 @@ def change_work_home(data:StaffState): #work, home만 들어옴
                 'leave_time': time,
                 'status' : status
             }
-        supabase.table('Attendance').update(update_data) \
+        supabase.table('attendance').update(update_data) \
             .eq('name', name).eq('year', year).eq('month', month).eq('day', day).execute()
 
 def find_today_state(name, year, month, day):
-    record = supabase.table('Attendance').select("status") \
+    record = supabase.table('attendance').select("status") \
         .eq('name', name).eq('year', year).eq('month', month).eq('day', day).execute().data
     
     if not record:
         return {'status' : 'not_work', 'ishalf' : False}
     else:
         today_state = record[0]['status']
-        today = f"{month}/{day}"
+        today = f"{year}-{month}-{day}"
         record = supabase.table('rest').select("category") \
-        .eq('name', name).eq('year', year).eq('date', today).execute().data
+        .eq('name', name).eq('date', today).execute().data
 
         if not record:
             return {'status' : today_state, 'ishalf' : False}
@@ -74,7 +74,6 @@ def find_today_state(name, year, month, day):
 
 class RestData(BaseModel):
     name: str
-    year: int
     date: str
     time: str
     category: str
@@ -83,12 +82,12 @@ def record_rest(data: RestData):
     supabase.table('rest').insert(data_dict).execute()
     
     if data.category == 'full': #연차의 경우 행이 없음
-        month, day = map(int, data.date.split("/"))
+        year, month, day = map(int, data.date.split("-"))
         insert_data = {
             "name":data.name,
-            "year":data.year,
+            "year":year,
             "month":month,
             "day":day,
             "status":"full"
         }
-        supabase.table('Attendance').insert(insert_data).execute()
+        supabase.table('attendance').insert(insert_data).execute()

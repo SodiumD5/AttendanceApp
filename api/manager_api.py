@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel
 from database import manager_db
-from jose import JWTError, jwt
+from jose import jwt
 from typing import Optional
 
 import os
@@ -42,4 +42,30 @@ def check_token(authorization: Optional[str] = Header(None)):
 def attendance(name:str, year:int, month:int, token: str = Depends(check_token)):  
     record = manager_db.month_attendance_data(name, year, month)
     return record
+
+@router.put('/{name}/deactivate', status_code=204)
+def deactivate(name:str, token: str = Depends(check_token)):
+    manager_db.inactive_staff(name)
     
+class NewStaff(BaseModel):
+    staff_name: str
+    enroll_date: str
+@router.post('/enrollment', status_code=200)
+def enrollment(newstaff:NewStaff, token: str = Depends(check_token)):
+    return manager_db.add_staff(newstaff.staff_name, newstaff.enroll_date)
+
+@router.get('/rest/{staff_name}/{year}', status_code=200)
+def rest(staff_name:str, year:int, token: str = Depends(check_token)):
+    record = manager_db.search_yearly_rest_data(staff_name, year)
+    
+    count = 0
+    for index, item in enumerate(record):
+        if item["category"] == "full":
+            count += 1
+        else:
+            count += 0.5
+        record[index]['count'] = f"{count}번째"
+        
+        if not item["time"] :
+            item["time"] = "연차"
+    return record
