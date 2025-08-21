@@ -9,6 +9,7 @@ import StaffCard from "../components/StaffCard";
 import AlertModal from "../components/AlertModal";
 import useTokenStore from "../store/tokenStore";
 import axiosInstance from "../api/axios";
+import RectangleButton from "../components/RectangleButton";
 
 const Manage = ({ navigation }) => {
     const [staffInfo, setStaffInfo] = useState([]);
@@ -143,10 +144,8 @@ const Manage = ({ navigation }) => {
                     contentContainerStyle={styles.listContent}
                 />
             </View>
-
-            <TouchableOpacity style={styles.addButton} onPress={toggleModal}>
-                <Text style={styles.addButtonText}>교직원 추가</Text>
-            </TouchableOpacity>
+            
+            <RectangleButton message="교직원 추가" onPress={toggleModal}></RectangleButton>
 
             <Modal isVisible={isModalVisible} onBackdropPress={toggleModal}>
                 <View style={styles.modalContent}>
@@ -196,28 +195,6 @@ const styles = StyleSheet.create({
     },
     listContent: {
         paddingBottom: 80,
-    },
-
-    addButton: {
-        position: "absolute",
-        bottom: 30,
-        alignSelf: "center",
-        width: "80%",
-        backgroundColor: "#596DE9",
-        padding: 15,
-        borderRadius: 15,
-        alignItems: "center",
-        justifyContent: "center",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 5,
-    },
-    addButtonText: {
-        color: "white",
-        fontSize: 18,
-        fontWeight: "bold",
     },
 
     modalContent: {

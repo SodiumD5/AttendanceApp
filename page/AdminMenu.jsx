@@ -4,6 +4,7 @@ import Colors from "../components/Colors";
 import AdminHeader from "../layout/AdminHeader";
 import BigButton from "../components/BigButton";
 import ShortButton from "../components/ShortButton";
+import RectangleButton from "../components/RectangleButton";
 
 const AdminMenu = ({ navigation }) => {
     return (
@@ -17,9 +18,9 @@ const AdminMenu = ({ navigation }) => {
                 onPress={() => navigation.push("AnnualLedger")}></BigButton>
             <BigButton context="교직원 관리" onPress={() => navigation.push("Manage")}></BigButton>
 
-            <View style={styles.loginButton}>
-                <ShortButton context="로그아웃" onPress={() => navigation.popToTop()}></ShortButton>
-            </View>
+            <RectangleButton
+                message="로그아웃"
+                onPress={() => navigation.popToTop()}></RectangleButton>
         </View>
     );
 };
@@ -30,12 +31,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: Colors.background,
-
         alignItems: "center",
-    },
-
-    loginButton: {
-        position: "absolute",
-        bottom: 70,
     },
 });

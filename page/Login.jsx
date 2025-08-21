@@ -1,25 +1,34 @@
-import { StyleSheet, View, Text, TextInput, Image, Alert, Keyboard, Animated } from "react-native";
+import { StyleSheet, View, Text, TextInput, Image, Keyboard, Animated } from "react-native";
 import { useState, useEffect, useRef } from "react";
 
 import Colors from "../components/Colors";
 
-import ShortButton from "../components/ShortButton";
 import GoBack from "../components/GoBack";
 import useTokenStore from "../store/tokenStore";
-
-const wrong_pw = () => {
-    Alert.alert("비밀번호가 틀렸습니다.");
-};
+import AlertModal from "../components/AlertModal";
+import RectangleButton from "../components/RectangleButton";
 
 const Login = ({ navigation }) => {
     const [inputId, setinputId] = useState("");
     const [inputPw, setinputPw] = useState("");
+    const [isWrongVisible, setIsWrongVisible] = useState(false);
 
     const keyboardHeight = useRef(new Animated.Value(0)).current;
-    const buttonBottom = useRef(new Animated.Value(70)).current;
+    const buttonBottom = useRef(new Animated.Value(0)).current;
 
     const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
     const { token, setToken } = useTokenStore();
+
+    const wrong_pw = () => {
+        return (
+            <AlertModal
+                isVisible={isWrongVisible}
+                setIsVisible={setIsWrongVisible}
+                title="비밀번호가 틀렸습니다."
+                bgColor={Colors.primary_red}
+            />
+        );
+    };
 
     const handleLogin = async () => {
         const loginInfo = {
@@ -40,7 +49,7 @@ const Login = ({ navigation }) => {
             const responseMessage = await response.json();
             if (!responseMessage.access_token) {
                 setToken(null);
-                wrong_pw();
+                setIsWrongVisible(true);
             } else {
                 setToken(responseMessage.access_token);
                 navigation.push("AdminMenu", {
@@ -76,7 +85,7 @@ const Login = ({ navigation }) => {
                 useNativeDriver: false,
             }).start();
             Animated.timing(buttonBottom, {
-                toValue: 70,
+                toValue: 0,
                 duration: 250,
                 useNativeDriver: false,
             }).start();
@@ -120,9 +129,10 @@ const Login = ({ navigation }) => {
                 autocomplete="off"
                 autoCorrect={false}></TextInput>
 
-            <Animated.View style={[styles.loginButton, { bottom: buttonBottom }]}>
-                <ShortButton context="로그인하기" onPress={handleLogin}></ShortButton>
+            <Animated.View style={[styles.loginButtonContainer, { bottom: buttonBottom }]}>
+                <RectangleButton message="로그인 하기" onPress={handleLogin}></RectangleButton>
             </Animated.View>
+            {wrong_pw()}
         </Animated.View>
     );
 };
@@ -169,8 +179,11 @@ const styles = StyleSheet.create({
         fontWeight: 500,
     },
 
-    loginButton: {
+    loginButtonContainer: {
         position: "absolute",
-        bottom: 70,
+        left: 0,
+        right: 0,
+        alignItems: "center",
+        paddingBottom: 30,
     },
 });
