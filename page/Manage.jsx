@@ -155,14 +155,9 @@ const Manage = ({ navigation }) => {
                     <TouchableOpacity style={styles.dateInput} onPress={showDatePicker}>
                         <Text style={styles.dateText}>{formatDate(registerDay)}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.modalButton} onPress={handleAddStaff}>
-                        <Text style={styles.modalButtonText}>추가하기</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.modalButton, styles.cancelButton]}
-                        onPress={toggleModal}>
-                        <Text style={styles.modalButtonText}>취소</Text>
-                    </TouchableOpacity>
+        
+                    <RectangleButton message="추가하기" onPress={handleAddStaff} buttontype="modal"></RectangleButton>
+                    <RectangleButton message="취소" onPress={toggleModal} buttonColor="white" buttontype="modal"></RectangleButton>
                 </View>
             </Modal>
         );
@@ -224,6 +219,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         borderRadius: 10,
+        margin: 20,
     },
     modalTitle: {
         fontSize: 20,
@@ -252,21 +248,5 @@ const styles = StyleSheet.create({
     dateText: {
         fontSize: 16,
         color: "#000",
-    },
-    modalButton: {
-        width: "100%",
-        backgroundColor: "#596DE9",
-        padding: 12,
-        borderRadius: 10,
-        alignItems: "center",
-        marginTop: 10,
-    },
-    modalButtonText: {
-        color: "white",
-        fontSize: 16,
-        fontWeight: "bold",
-    },
-    cancelButton: {
-        backgroundColor: "#D3D3D3",
     },
 });

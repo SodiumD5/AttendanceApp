@@ -7,6 +7,7 @@ import AdminHeader from "../layout/AdminHeader";
 import useTokenStore from "../store/tokenStore";
 import AlertModal from "../components/AlertModal";
 import axiosInstance from "../api/axios";
+import PickerModal from "../components/PickerModal";
 
 const AnnualLedger = ({ navigation }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -103,64 +104,33 @@ const AnnualLedger = ({ navigation }) => {
             name: selectedStaff,
             year: selectedYear,
             limit: parseInt(text),
-        }
+        };
         await axiosInstance.put(url, data);
     };
 
+    // 연도 선택 모달
     const renderYearPicker = () => (
-        <Modal
+        <PickerModal
+            data={years}
+            select={selectedYear}
+            setSelect={setSelectedYear}
             isVisible={showYearPicker}
-            onBackdropPress={() => setShowYearPicker(false)}
-            style={styles.Modal}>
-            <View style={styles.pickerModal}>
-                <FlatList
-                    data={years}
-                    keyExtractor={(item) => item.toString()}
-                    renderItem={({ item }) => (
-                        <Pressable
-                            style={[
-                                styles.pickerItem,
-                                item === selectedYear && styles.pickerItemActive,
-                            ]}
-                            onPress={() => {
-                                setSelectedYear(item);
-                                setShowYearPicker(false);
-                            }}>
-                            <Text style={styles.pickerItemText}>{item}</Text>
-                        </Pressable>
-                    )}
-                    bounces={false}
-                />
-            </View>
-        </Modal>
+            setIsVisible={setShowYearPicker}
+            keyExtractor={(item) => item.toString()}
+            renderText={(item) => item.toString()}
+        />
     );
-
+    // 직원 선택 모달
     const renderStaffPicker = () => (
-        <Modal
+        <PickerModal
+            data={stafflist}
+            select={selectedStaff}
+            setSelect={setSelectedStaff}
             isVisible={showStaffPicker}
-            onBackdropPress={() => setShowStaffPicker(false)}
-            style={styles.Modal}>
-            <View style={styles.pickerModal}>
-                <FlatList
-                    data={stafflist}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <Pressable
-                            style={[
-                                styles.pickerItem,
-                                item === selectedStaff && styles.pickerItemActive,
-                            ]}
-                            onPress={() => {
-                                setSelectedStaff(item.name);
-                                setShowStaffPicker(false);
-                            }}>
-                            <Text style={styles.pickerItemText}>{item.name}</Text>
-                        </Pressable>
-                    )}
-                    bounces={false}
-                />
-            </View>
-        </Modal>
+            setIsVisible={setShowStaffPicker}
+            keyExtractor={(item) => item.id.toString()}
+            renderText={(item) => item.name}
+        />
     );
 
     return (
@@ -340,24 +310,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: Colors.text_gray,
         fontWeight: "bold",
-    },
-    pickerModal: {
-        backgroundColor: Colors.primary_white,
-        borderRadius: 10,
-        maxHeight: "50%",
-        width: "80%",
-    },
-    pickerItem: {
-        padding: 15,
-        alignItems: "center",
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.primary_gray,
-    },
-    pickerItemText: {
-        fontSize: 18,
-    },
-    pickerItemActive: {
-        backgroundColor: Colors.primary_gray,
     },
     Modal: {
         justifyContent: "center",

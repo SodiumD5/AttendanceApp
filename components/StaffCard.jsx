@@ -5,6 +5,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import Modal from "react-native-modal";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import axiosInstance from "../api/axios";
+import RectangleButton from "./RectangleButton";
 
 export default function StaffCard({ name, date, refresh }) {
     const [deleteVisible, setDeleteVisible] = useState(false);
@@ -86,14 +87,8 @@ export default function StaffCard({ name, date, refresh }) {
                         <Text style={styles.dateText}>{enterDayKO}</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.modalButton} onPress={modifyConfirm}>
-                        <Text style={styles.modalButtonText}>변경하기</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.modalButton, styles.cancelButton]}
-                        onPress={toggleModify}>
-                        <Text style={styles.modalButtonText}>취소</Text>
-                    </TouchableOpacity>
+                    <RectangleButton message="변경하기" onPress={modifyConfirm} buttontype="modal"></RectangleButton>
+                    <RectangleButton message="취소" onPress={toggleModify} buttonColor="white" buttontype="modal"></RectangleButton>
                 </View>
             </Modal>
         );
@@ -125,14 +120,9 @@ export default function StaffCard({ name, date, refresh }) {
                         해당 기능은, 숨기기 기능입니다. 숨기기를 해제하고 싶다면, 같은 이름을 다시
                         추가해 보세요!
                     </Text>
-                    <TouchableOpacity style={styles.modalButton} onPress={handleDelete}>
-                        <Text style={styles.modalButtonText}>확인</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.modalButton, styles.cancelButton]}
-                        onPress={toggleConfirm}>
-                        <Text style={styles.modalButtonText}>취소</Text>
-                    </TouchableOpacity>
+
+                    <RectangleButton message="확인" onPress={handleDelete} buttontype="modal"></RectangleButton>
+                    <RectangleButton message="취소" onPress={toggleConfirm} buttonColor="white" buttontype="modal"></RectangleButton>
                 </View>
             </Modal>
         </View>
@@ -186,6 +176,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         borderRadius: 10,
+        margin: 20,
     },
     modalTitle: {
         fontSize: 20,
@@ -214,21 +205,5 @@ const styles = StyleSheet.create({
     dateText: {
         fontSize: 16,
         color: "#000",
-    },
-    modalButton: {
-        width: "100%",
-        backgroundColor: "#596DE9",
-        padding: 12,
-        borderRadius: 10,
-        alignItems: "center",
-        marginTop: 10,
-    },
-    modalButtonText: {
-        color: "white",
-        fontSize: 16,
-        fontWeight: "bold",
-    },
-    cancelButton: {
-        backgroundColor: "#D3D3D3",
     },
 });

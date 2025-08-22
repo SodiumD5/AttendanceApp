@@ -65,8 +65,12 @@ def rest(staff_name:str, year:int, token: str = Depends(check_token)):
             count += 1
         else:
             count += 0.5
-        record[index]['count'] = f"{count}회"
         
+        if int(count) == count: #소수점 안 나오도록 조정
+            record[index]['count'] = f"{int(count)}회"
+        else:
+            record[index]['count'] = f"{count}회"
+            
         if not item["time"]:
             item["time"] = "연차"
         else:
@@ -97,3 +101,14 @@ class ModifyTotalRest(BaseModel):
 @router.put('/modification/rest', status_code=204)
 def modify_rest(modifytotalrest:ModifyTotalRest, token: str = Depends(check_token)):
     manager_db.modify_rest_limit(modifytotalrest)
+    
+class ModifyAttendenceData(BaseModel):
+    name : str
+    year : int
+    month : int
+    day : int
+    work_time : str
+    leave_time : str
+@router.put('/modification/attendence', status_code=204)
+def modfiy_attendence(modifyattendencedate:ModifyAttendenceData, token: str = Depends(check_token)):
+    print(modifyattendencedate)

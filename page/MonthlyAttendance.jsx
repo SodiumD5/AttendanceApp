@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Pressable, FlatList } from "react-native";
+import { StyleSheet, View, Text, Pressable, FlatList, TouchableOpacity } from "react-native";
 import Modal from "react-native-modal";
 
 import Colors from "../components/Colors";
@@ -7,6 +7,8 @@ import AdminHeader from "../layout/AdminHeader";
 import AlertModal from "../components/AlertModal";
 import axiosInstance from "../api/axios";
 import useTokenStore from "../store/tokenStore";
+import RectangleButton from "../components/RectangleButton";
+import PickerModal from "../components/PickerModal";
 
 const MonthlyAttendance = ({ navigation }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -20,11 +22,13 @@ const MonthlyAttendance = ({ navigation }) => {
     const [showSearchModal, setShowSearchModal] = useState(false);
     const [titleMessage, setTitleMessage] = useState("검색조건을 설정해주세요");
     const [showAlertModal, setShowAlertModal] = useState(false);
+    const [showModifyModal, setShowModifyModal] = useState(false);
+    const [selectedItem, setSelectedItem] = useState();
+    const [modifyData, setModifyData] = useState({});
 
     const years = Array.from({ length: 76 }, (_, i) => 2025 + i);
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
-    //토큰 만료될 시 로그인 화면으로 튕김
     const [sessionExpiration, setSessionExpiration] = useState(false);
     const { token } = useTokenStore();
     useEffect(() => {
@@ -60,7 +64,6 @@ const MonthlyAttendance = ({ navigation }) => {
         setTitleMessage(`${selectedYear}년 ${selectedMonth}월 ${selectedStaff} 출근부`);
 
         const response = await axiosInstance.get(
-            //axiosInstance의 baseurl에 이미 설정 되있어서 앞 날려도 됨.
             `/attendance/?name=${selectedStaff}&year=${selectedYear}&month=${selectedMonth}`
         );
         setSearchResult(response.data);
@@ -81,116 +84,172 @@ const MonthlyAttendance = ({ navigation }) => {
         } else if (rest === "full") {
             return "연차";
         } else {
-            return "X";
+            return "출근";
         }
     };
 
     const renderItem = ({ item }) => (
-        <View style={styles.tableRow}>
-            <Text style={styles.rowText}>{item.day || "X"}</Text>
-            <Text style={styles.rowText}>{item.work_time || "X"}</Text>
-            <Text style={styles.rowText}>{item.leave_time || "X"}</Text>
-            <Text style={styles.rowText}>{restText(item.rest)}</Text>
-        </View>
+        <TouchableOpacity
+            onPress={() => {
+                toggleModifyModal({ item });
+            }}>
+            <View style={styles.tableRow}>
+                <Text style={styles.rowText}>{item.day}</Text>
+                <Text style={styles.rowText}>{item.work_time || "X"}</Text>
+                <Text style={styles.rowText}>{item.leave_time || "X"}</Text>
+                <Text style={styles.rowText}>{restText(item.rest)}</Text>
+            </View>
+        </TouchableOpacity>
     );
 
+    const [workTimeModalVisible, setWorkTimeModalVisible] = useState(false);
+    const [leaveTimeModalVisible, setLeaveTimeModalVisible] = useState(false);
+    const [restModalVisible, setRestModalVisible] = useState(false);
+    const [selectedRest, setSelectedRest] = useState();
+    const toggleModifyModal = ({ item }) => {
+        setSelectedItem(item);
+        setShowModifyModal(!showModifyModal);
+    };
+    const submitModifyData = async () => {
+        const url = "/modification/attendence";
+        await axiosInstance.put(url, modifyData);
+
+        toggleModifyModal();
+    };
+    useEffect(() => {
+        if (selectedItem) {
+            //기본값 설정
+            setSelectedRest(restText(selectedItem.rest));
+            
+            const [day_int, trash] = selectedItem.day.split("일");
+            setModifyData({
+                name: selectedStaff,
+                year: parseInt(selectedYear),
+                month: parseInt(selectedMonth),
+                day: parseInt(day_int),
+                work_time: "",
+                leave_time: "",
+            });
+        }
+    }, [selectedItem]);
+    const TimeComponent = ({ guideText, infoText, onPress }) => {
+        return (
+            <TouchableOpacity style={styles.ModifyModalTimeContainer} onPress={onPress}>
+                <Text style={styles.ModifyModalTimeText}>{guideText}</Text>
+                <Text style={styles.ModifyModalTimeText}>{infoText}</Text>
+            </TouchableOpacity>
+        );
+    };
+    const renderWorkTimeModal = () => {};
+    const renderLeaveTimeModal = () => {};
+    const renderRestModal = () => {
+        const RestData = ["출근", "반차", "연차"];
+        return (
+            <PickerModal
+                data={RestData}
+                select={selectedRest}
+                setSelect={setSelectedRest}
+                isVisible={restModalVisible}
+                setIsVisible={setRestModalVisible}
+                keyExtractor={(item) => item.toString()}
+                renderText={(item) => item.toString()}
+            />
+        );
+    };
+    const toggleRestModal = () => {
+        setRestModalVisible(!restModalVisible);
+    };
+
+    const ModifyModal = () => {
+        if (!selectedItem) {
+            return null;
+        }
+
+        const title = `${selectedItem.day} 출근부 수정`;
+        let work_text;
+        let leave_text;
+        if (selectedItem.work_time) {
+            const [work_hour, work_minute] = selectedItem.work_time.split(":");
+            work_text = `${work_hour}시 ${work_minute}분`;
+        } else {
+            work_text = "X";
+        }
+        if (selectedItem.leave_time) {
+            const [leave_hour, leave_minute] = selectedItem.leave_time.split(":");
+            leave_text = `${leave_hour}시 ${leave_minute}분`;
+        } else {
+            leave_text = "X";
+        }
+
+        return (
+            <Modal isVisible={showModifyModal} onBackdropPress={toggleModifyModal}>
+                <View style={styles.ModifyModalContainer}>
+                    <Text style={styles.ModifyModalTitle}>{title}</Text>
+
+                    <TimeComponent guideText="출근 시각 : " infoText={work_text}></TimeComponent>
+                    <TimeComponent guideText="퇴근 시각 : " infoText={leave_text}></TimeComponent>
+                    <TimeComponent
+                        guideText="휴가 : "
+                        infoText={selectedRest}
+                        onPress={toggleRestModal}></TimeComponent>
+
+                    <RectangleButton
+                        message="변경하기"
+                        onPress={submitModifyData}
+                        buttontype="modal"></RectangleButton>
+                    <RectangleButton
+                        message="취소"
+                        onPress={() => {
+                            toggleModifyModal({ item: null });
+                        }}
+                        buttonColor="white"
+                        buttontype="modal"></RectangleButton>
+                </View>
+            </Modal>
+        );
+    };
+
     const renderYearPicker = () => (
-        <Modal
+        <PickerModal
+            data={years}
+            select={selectedYear}
+            setSelect={setSelectedYear}
             isVisible={showYearPicker}
-            onBackdropPress={() => setShowYearPicker(false)}
-            onSwipeComplete={() => setShowYearPicker(false)}
-            swipeDirection={["down"]}
-            style={styles.bottomModal}>
-            <View style={styles.pickerModal}>
-                <FlatList
-                    data={years}
-                    keyExtractor={(item) => item.toString()}
-                    renderItem={({ item }) => (
-                        <Pressable
-                            style={[
-                                styles.pickerItem,
-                                item === selectedYear && styles.pickerItemActive,
-                            ]}
-                            onPress={() => {
-                                setSelectedYear(item);
-                                setShowYearPicker(false);
-                            }}>
-                            <Text style={styles.pickerItemText}>{item}</Text>
-                        </Pressable>
-                    )}
-                    bounces={false}
-                />
-            </View>
-        </Modal>
+            setIsVisible={setShowYearPicker}
+            keyExtractor={(item) => item.toString()}
+            renderText={(item) => item.toString()}
+        />
     );
 
     const renderMonthPicker = () => (
-        <Modal
+        <PickerModal
+            data={months}
+            select={selectedMonth}
+            setSelect={setSelectedMonth}
             isVisible={showMonthPicker}
-            onBackdropPress={() => setShowMonthPicker(false)}
-            onSwipeComplete={() => setShowMonthPicker(false)}
-            swipeDirection={["down"]}
-            style={styles.bottomModal}>
-            <View style={styles.pickerModal}>
-                <FlatList
-                    data={months}
-                    keyExtractor={(item) => item.toString()}
-                    renderItem={({ item }) => (
-                        <Pressable
-                            style={[
-                                styles.pickerItem,
-                                item === selectedMonth && styles.pickerItemActive,
-                            ]}
-                            onPress={() => {
-                                setSelectedMonth(item);
-                                setShowMonthPicker(false);
-                            }}>
-                            <Text style={styles.pickerItemText}>{item}</Text>
-                        </Pressable>
-                    )}
-                    bounces={false}
-                />
-            </View>
-        </Modal>
+            setIsVisible={setShowMonthPicker}
+            keyExtractor={(item) => item.toString()}
+            renderText={(item) => item.toString()}
+        />
     );
 
     const renderStaffPicker = () => (
-        <Modal
+        <PickerModal
+            data={stafflist}
+            select={selectedStaff}
+            setSelect={setSelectedStaff}
             isVisible={showStaffPicker}
-            onBackdropPress={() => setShowStaffPicker(false)}
-            onSwipeComplete={() => setShowStaffPicker(false)}
-            swipeDirection={["down"]}
-            style={styles.bottomModal}>
-            <View style={styles.pickerModal}>
-                <FlatList
-                    data={stafflist}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <Pressable
-                            style={[
-                                styles.pickerItem,
-                                item.name === selectedStaff && styles.pickerItemActive,
-                            ]}
-                            onPress={() => {
-                                setSelectedStaff(item.name);
-                                setShowStaffPicker(false);
-                            }}>
-                            <Text style={styles.pickerItemText}>{item.name}</Text>
-                        </Pressable>
-                    )}
-                    bounces={false}
-                />
-            </View>
-        </Modal>
+            setIsVisible={setShowStaffPicker}
+            keyExtractor={(item) => item.id.toString()}
+            renderText={(item) => item.name}
+        />
     );
 
     const renderSearchModal = () => (
         <Modal
             isVisible={showSearchModal}
             onBackdropPress={() => setShowSearchModal(false)}
-            onSwipeComplete={() => setShowSearchModal(false)}
-            swipeDirection={["down"]}
-            style={styles.bottomModal}>
+            style={styles.searchModal}>
             <View style={styles.modalView}>
                 <View style={styles.filterRow}>
                     <Pressable style={styles.pickerButton} onPress={() => setShowYearPicker(true)}>
@@ -208,8 +267,9 @@ const MonthlyAttendance = ({ navigation }) => {
                         <Text style={styles.arrowIcon}>▼</Text>
                     </Pressable>
                 </View>
-                <Pressable
-                    style={styles.searchButton}
+
+                <RectangleButton
+                    message="검색"
                     onPress={() => {
                         if (selectedStaff === "직원 선택") {
                             setShowSearchModal(false);
@@ -218,12 +278,16 @@ const MonthlyAttendance = ({ navigation }) => {
                             handleSearch();
                             setShowSearchModal(false);
                         }
-                    }}>
-                    <Text style={styles.searchButtonText}>검색</Text>
-                </Pressable>
-                <Pressable style={styles.closeButton} onPress={() => setShowSearchModal(false)}>
-                    <Text style={styles.textStyle}>닫기</Text>
-                </Pressable>
+                    }}
+                    buttonColor="blue"
+                    buttontype="modal"></RectangleButton>
+                <RectangleButton
+                    message="취소"
+                    onPress={() => {
+                        setShowSearchModal(false);
+                    }}
+                    buttonColor="white"
+                    buttontype="modal"></RectangleButton>
             </View>
         </Modal>
     );
@@ -274,6 +338,9 @@ const MonthlyAttendance = ({ navigation }) => {
             {renderStaffPicker()}
             {showAlertModal && renderAlert()}
             {viewSessionExpiration()}
+            {ModifyModal()}
+
+            {renderRestModal()}
         </View>
     );
 };
@@ -302,8 +369,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         flex: 1,
         backgroundColor: Colors.primary_gray,
-        paddingVertical: 10,
-        paddingHorizontal: 15,
+        paddingVertical: 15,
+        paddingHorizontal: 16,
         borderRadius: 8,
         marginHorizontal: 5,
     },
@@ -315,30 +382,6 @@ const styles = StyleSheet.create({
     arrowIcon: {
         fontSize: 14,
         color: Colors.text_gray,
-    },
-    searchButton: {
-        backgroundColor: Colors.primary_blue,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        width: "100%",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    closeButton: {
-        marginTop: 5,
-        backgroundColor: Colors.primary_gray,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        width: "100%",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    searchButtonText: {
-        color: "white",
-        fontWeight: "bold",
-        fontSize: 16,
     },
     listContainer: {
         flex: 1,
@@ -393,8 +436,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: Colors.text_gray,
     },
-    bottomModal: {
-        justifyContent: "flex-end",
+    searchModal: {
+        justifyContent: "center",
+        alignItems: "center",
         margin: 0,
     },
     pickerModal: {
@@ -419,8 +463,8 @@ const styles = StyleSheet.create({
     modalView: {
         backgroundColor: "white",
         padding: 20,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
+        borderRadius: 20,
+        width: "80%",
         alignItems: "center",
         shadowColor: "#000",
         shadowOffset: {
@@ -444,9 +488,27 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 16,
     },
-    textStyle: {
-        color: "white",
+    ModifyModalContainer: {
+        backgroundColor: "white",
+        padding: 20,
+        paddingHorizontal: 30,
+        marginHorizontal: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 10,
+    },
+    ModifyModalTitle: {
+        fontSize: 20,
         fontWeight: "bold",
-        textAlign: "center",
+        marginBottom: 20,
+    },
+    ModifyModalTimeContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "100%",
+        marginBottom: 10,
+    },
+    ModifyModalTimeText: {
+        fontSize: 16,
     },
 });
