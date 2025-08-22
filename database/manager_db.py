@@ -64,4 +64,36 @@ def modify_enterDate(modifydate:ModifyDate):
     supabase.table('employee').update({'registerDay' : modifydate.date}) \
         .eq('name', modifydate.name).execute()
     
+class TotalRest(BaseModel):
+    name : str
+    year : int
+def get_rest_limit(totalrest:TotalRest):
+    name = totalrest.name
+    year = totalrest.year
+    
+    record = supabase.table('rest_limit').select('limit') \
+        .eq('name', name).eq('year', year).execute().data
+    
+    if record:
+        return record[0]["limit"]
+    else:
+        insert_data = {
+            'name' : name,
+            'year' : year,
+            'limit' : 15 #기본값
+        }
+        supabase.table('rest_limit').insert(insert_data).execute()
+        return 15
+
+class ModifyTotalRest(BaseModel):
+    name : str
+    year : int
+    limit : int
+def modify_rest_limit(modifytotalrest:ModifyTotalRest):
+    name = modifytotalrest.name
+    year = modifytotalrest.year
+    limit = modifytotalrest.limit
+    
+    supabase.table('rest_limit').update({'limit': limit}) \
+        .eq('name', name).eq('year', year).execute()
     

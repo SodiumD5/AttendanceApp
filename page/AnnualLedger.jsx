@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Pressable, FlatList } from "react-native";
+import { StyleSheet, View, Text, Pressable, FlatList, TextInput } from "react-native";
 import Modal from "react-native-modal";
 
 import Colors from "../components/Colors";
@@ -15,6 +15,9 @@ const AnnualLedger = ({ navigation }) => {
     const [restData, setRestData] = useState([]);
     const [showYearPicker, setShowYearPicker] = useState(false);
     const [showStaffPicker, setShowStaffPicker] = useState(false);
+    const [restCount, setRestCount] = useState(0);
+    const [totalRestCount, setTotalRestCount] = useState(15);
+    const [totalRestEdit, setTotalRestEdit] = useState(false);
 
     const years = Array.from({ length: 76 }, (_, i) => 2025 + i);
 
@@ -54,9 +57,23 @@ const AnnualLedger = ({ navigation }) => {
     }, []);
 
     const handleSearch = async () => {
-        const url = `/rest/${selectedStaff}/${selectedYear}`;
-        const response = await axiosInstance.get(url);
-        setRestData(response.data);
+        //연차 내역 가져오기
+        var url = `/rest/${selectedStaff}/${selectedYear}`;
+        const rest_records = await axiosInstance.get(url);
+        const response_data = rest_records.data;
+
+        setRestData(response_data["info"]);
+        setRestCount(response_data["count"]);
+
+        //총 연차 일수 가져오기 (없으면 생성)
+        var url = "/rest/limit";
+        const postData = {
+            name: selectedStaff,
+            year: selectedYear,
+        };
+        const rest_limit = await axiosInstance.post(url, postData);
+        setTotalRestEdit(true);
+        setTotalRestCount(rest_limit.data);
     };
 
     const renderHeader = () => (
@@ -76,6 +93,18 @@ const AnnualLedger = ({ navigation }) => {
                 <Text style={styles.rowText}>{item.time}</Text>
             </View>
         );
+    };
+
+    //전체 휴가 횟수 바꾸기
+    const onChangeLimit = async (text) => {
+        setTotalRestCount(text);
+        const url = "/modification/rest";
+        const data = {
+            name: selectedStaff,
+            year: selectedYear,
+            limit: parseInt(text),
+        }
+        await axiosInstance.put(url, data);
     };
 
     const renderYearPicker = () => (
@@ -138,23 +167,53 @@ const AnnualLedger = ({ navigation }) => {
         <View style={styles.container}>
             <AdminHeader nav={navigation} menuName="연차대장"></AdminHeader>
 
-            <View style={styles.searchContainer}>
-                <View style={styles.pickerWrapper}>
-                    <Pressable style={styles.pickerButton} onPress={() => setShowYearPicker(true)}>
-                        <Text style={styles.pickerText}>{selectedYear}</Text>
-                        <Text style={styles.arrowIcon}>▼</Text>
+            <View style={styles.headerContainer}>
+                <View style={styles.serachContainer}>
+                    <View style={styles.pickerWrapper}>
+                        <Pressable
+                            style={styles.pickerButton}
+                            onPress={() => setShowYearPicker(true)}>
+                            <Text style={styles.pickerText}>{selectedYear}</Text>
+                            <Text style={styles.arrowIcon}>▼</Text>
+                        </Pressable>
+                        <Text style={styles.pickerLabel}> 년</Text>
+                    </View>
+                    <View style={styles.pickerWrapper}>
+                        <Pressable
+                            style={styles.pickerButton}
+                            onPress={() => setShowStaffPicker(true)}>
+                            <Text style={styles.pickerText}>{selectedStaff}</Text>
+                            <Text style={styles.arrowIcon}>▼</Text>
+                        </Pressable>
+                    </View>
+                    <Pressable style={styles.searchButton} onPress={handleSearch}>
+                        <Text style={styles.searchButtonText}>검색</Text>
                     </Pressable>
-                    <Text style={styles.pickerLabel}> 년</Text>
                 </View>
-                <View style={styles.pickerWrapper}>
-                    <Pressable style={styles.pickerButton} onPress={() => setShowStaffPicker(true)}>
-                        <Text style={styles.pickerText}>{selectedStaff}</Text>
-                        <Text style={styles.arrowIcon}>▼</Text>
-                    </Pressable>
+
+                <View style={styles.summaryContainer}>
+                    <View style={styles.summaryItem}>
+                        <Text style={styles.summaryLabel}>총 연차 일수</Text>
+                        <View style={{ flexDirection: "row" }}>
+                            <TextInput
+                                style={styles.summaryValue}
+                                keyboardType="numeric"
+                                onChangeText={onChangeLimit}
+                                value={`${totalRestCount}`}
+                                editable={totalRestEdit}
+                            />
+                            <Text style={styles.summaryValue}>회</Text>
+                        </View>
+                    </View>
+                    <View style={styles.summaryItem}>
+                        <Text style={styles.summaryLabel}>사용 연차</Text>
+                        <Text style={styles.summaryValue}>{restCount}회</Text>
+                    </View>
+                    <View style={styles.summaryItem}>
+                        <Text style={styles.summaryLabel}>잔여 연차</Text>
+                        <Text style={styles.summaryValue}>{`${totalRestCount - restCount}회`}</Text>
+                    </View>
                 </View>
-                <Pressable style={styles.searchButton} onPress={handleSearch}>
-                    <Text style={styles.searchButtonText}>검색</Text>
-                </Pressable>
             </View>
 
             <FlatList
@@ -181,20 +240,22 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: Colors.background,
     },
-    searchContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-around",
+    headerContainer: {
         padding: 15,
         backgroundColor: Colors.primary_white,
         margin: 20,
-        marginBottom: 10,
+        marginBottom: 0,
         borderRadius: 12,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 5,
         elevation: 5,
+    },
+    serachContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
     },
     pickerWrapper: {
         flexDirection: "row",
@@ -210,10 +271,9 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: Colors.primary_gray,
-        paddingVertical: 8,
+        paddingVertical: 10,
         paddingHorizontal: 15,
         borderRadius: 8,
-        marginLeft: 5,
     },
     pickerText: {
         fontSize: 16,
@@ -304,5 +364,29 @@ const styles = StyleSheet.create({
         margin: 0,
         justifyContent: "center",
         alignItems: "center",
+    },
+
+    summaryContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginTop: 20,
+        paddingHorizontal: 20,
+    },
+    summaryItem: {
+        alignItems: "center",
+    },
+    summaryLabel: {
+        fontSize: 14,
+        color: Colors.text_gray,
+        marginBottom: 4,
+    },
+    summaryValue: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: Colors.text_gray,
+        padding: 0,
+        margin: 0,
+        lineHeight: 20,
     },
 });

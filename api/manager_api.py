@@ -65,7 +65,7 @@ def rest(staff_name:str, year:int, token: str = Depends(check_token)):
             count += 1
         else:
             count += 0.5
-        record[index]['count'] = f"{count}번째"
+        record[index]['count'] = f"{count}회"
         
         if not item["time"]:
             item["time"] = "연차"
@@ -74,7 +74,7 @@ def rest(staff_name:str, year:int, token: str = Depends(check_token)):
             
             item["time"] = f"{int(hour)}시 {int(minute)}분"
             
-    return record
+    return {"info" : record, "count" : count}
 
 class ModifyDate(BaseModel):
     name : str
@@ -82,3 +82,18 @@ class ModifyDate(BaseModel):
 @router.put('/modification/enterDate', status_code=204)
 def modify_enterDate(modifydate:ModifyDate, token: str = Depends(check_token)):
     return manager_db.modify_enterDate(modifydate)
+
+class TotalRest(BaseModel):
+    name : str
+    year : int
+@router.post('/rest/limit', status_code=200)
+def rest_limit(totalrest:TotalRest, token: str = Depends(check_token)):
+    return manager_db.get_rest_limit(totalrest)
+
+class ModifyTotalRest(BaseModel):
+    name : str
+    year : int
+    limit : int
+@router.put('/modification/rest', status_code=204)
+def modify_rest(modifytotalrest:ModifyTotalRest, token: str = Depends(check_token)):
+    manager_db.modify_rest_limit(modifytotalrest)
