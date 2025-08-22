@@ -1,32 +1,115 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+
 import Icon from "react-native-vector-icons/Ionicons";
 import Modal from "react-native-modal";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import axiosInstance from "../api/axios";
 
 export default function StaffCard({ name, date, refresh }) {
     const [deleteVisible, setDeleteVisible] = useState(false);
+    const [modifyVisible, setModifyVisible] = useState(false);
+    const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+    const [enterDay, setEnterDay] = useState(date); //2025-01-01 형식
+    const [enterDayKO, setEnterDayKO] = useState(""); //2025년 1월 1일 형식
+    const [enterDayISO, setEnterDayISO] = useState(new Date()); //ISO형식
+
+    useEffect(() => {
+        const [year, month, day] = date.split("-");
+        setEnterDayISO(new Date(year, month - 1, day));
+        setEnterDayKO(`${year}년 ${month}월 ${day}일`);
+    }, []);
+
+    const transformDate = (date) => {
+        const [year, month, day] = [date.getFullYear(), date.getMonth() + 1, date.getDate()];
+        setEnterDay(date.toISOString().split("T")[0]);
+        setEnterDayKO(`${year}년 ${month}월 ${day}일`);
+    };
 
     const toggleConfirm = () => {
         setDeleteVisible(!deleteVisible);
     };
 
+    const toggleModify = () => {
+        setModifyVisible(!modifyVisible);
+    };
+
     const handleDelete = async () => {
+        //강제 랜더링
         const url = `${name}/deactivate`;
         await axiosInstance.put(url);
         refresh((prevRefresh) => prevRefresh + 1);
         toggleConfirm();
     };
 
+    const toggleDatePicker = () => {
+        setDatePickerVisible(!isDatePickerVisible);
+    };
+
+    const handleDateConfirm = (date) => {
+        transformDate(date);
+        toggleDatePicker();
+    };
+
+    const renderDateModal = () => {
+        return (
+            <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                onConfirm={handleDateConfirm}
+                onCancel={toggleDatePicker}
+                date={enterDayISO}
+            />
+        );
+    };
+
+    const modifyConfirm = async () => {
+        toggleModify();
+        console.log(enterDay);
+        const postData = {
+            name: name,
+            date: enterDay,
+        };
+
+        const url = "/modification/enterDate";
+        await axiosInstance.put(url, postData);
+        refresh((prevRefresh) => prevRefresh + 1);
+    };
+
+    const renderModify = () => {
+        return (
+            <Modal isVisible={modifyVisible} onBackdropPress={toggleModify}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>{name} 정보 수정</Text>
+
+                    <TouchableOpacity style={styles.dateInput} onPress={toggleDatePicker}>
+                        <Text style={styles.dateText}>{enterDayKO}</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.modalButton} onPress={modifyConfirm}>
+                        <Text style={styles.modalButtonText}>변경하기</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.modalButton, styles.cancelButton]}
+                        onPress={toggleModify}>
+                        <Text style={styles.modalButtonText}>취소</Text>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
+        );
+    };
+
     return (
         <View style={styles.staffCard}>
-            <View style={styles.cardInfoContainer}>
+            {renderModify()}
+            {renderDateModal()}
+            <TouchableOpacity style={styles.cardInfoContainer} onPress={toggleModify}>
                 <Icon name="person-circle-outline" size={40} color="black" />
                 <View style={styles.staffDetails}>
                     <Text style={styles.staffName}>{name}</Text>
                     <Text style={styles.staffDate}>{date}</Text>
                 </View>
-            </View>
+            </TouchableOpacity>
 
             <TouchableOpacity onPress={toggleConfirm}>
                 <View style={styles.deleteContainer}>

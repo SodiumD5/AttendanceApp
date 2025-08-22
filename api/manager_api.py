@@ -52,7 +52,8 @@ class NewStaff(BaseModel):
     enroll_date: str
 @router.post('/enrollment', status_code=200)
 def enrollment(newstaff:NewStaff, token: str = Depends(check_token)):
-    return manager_db.add_staff(newstaff.staff_name, newstaff.enroll_date)
+    staff_name = newstaff.staff_name.strip()
+    return manager_db.add_staff(staff_name, newstaff.enroll_date)
 
 @router.get('/rest/{staff_name}/{year}', status_code=200)
 def rest(staff_name:str, year:int, token: str = Depends(check_token)):
@@ -66,6 +67,18 @@ def rest(staff_name:str, year:int, token: str = Depends(check_token)):
             count += 0.5
         record[index]['count'] = f"{count}번째"
         
-        if not item["time"] :
+        if not item["time"]:
             item["time"] = "연차"
+        else:
+            hour, minute = item["time"].split(":")
+            
+            item["time"] = f"{int(hour)}시 {int(minute)}분"
+            
     return record
+
+class ModifyDate(BaseModel):
+    name : str
+    date : str
+@router.put('/modification/enterDate', status_code=204)
+def modify_enterDate(modifydate:ModifyDate, token: str = Depends(check_token)):
+    return manager_db.modify_enterDate(modifydate)

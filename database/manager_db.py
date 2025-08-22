@@ -56,5 +56,12 @@ def search_yearly_rest_data(name, year):
     record = supabase.table('rest').select('*').eq('name', name) \
         .gte('date', start_date).lte('date', end_date).order('date').execute().data
     return record
-        
+
+class ModifyDate(BaseModel):
+    name : str
+    date : str
+def modify_enterDate(modifydate:ModifyDate):
+    supabase.table('employee').update({'registerDay' : modifydate.date}) \
+        .eq('name', modifydate.name).execute()
+    
     

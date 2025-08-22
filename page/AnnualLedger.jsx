@@ -63,7 +63,7 @@ const AnnualLedger = ({ navigation }) => {
         <View style={styles.tableHeader}>
             <Text style={styles.headerText}>사용횟수</Text>
             <Text style={styles.headerText}>날짜</Text>
-            <Text style={styles.headerText}>사용시각</Text>
+            <Text style={styles.headerText}>사용 시각</Text>
         </View>
     );
 

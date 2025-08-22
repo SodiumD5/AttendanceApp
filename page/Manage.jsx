@@ -39,11 +39,8 @@ const Manage = ({ navigation }) => {
                 onClose={() => {
                     navigation.reset({
                         index: 1,
-                        routes: [
-                            {name : 'StartPage'},
-                            {name : 'Login'}
-                        ]
-                    })
+                        routes: [{ name: "StartPage" }, { name: "Login" }],
+                    });
                 }}
             />
         );
@@ -84,16 +81,28 @@ const Manage = ({ navigation }) => {
         hideDatePicker();
     };
 
+    const [isNoNameAlert, setNoNameAlert] = useState(false);
+    const wrong_name = () => {
+        return (
+            <AlertModal
+                isVisible={isNoNameAlert}
+                setIsVisible={setNoNameAlert}
+                title="이름을 입력해주세요"
+                bgColor={Colors.primary_red}
+            />
+        );
+    };
+
     const handleAddStaff = async () => {
         if (newStaffName.trim() === "") {
-            Alert.alert("오류", "이름을 입력해주세요.");
+            setNoNameAlert(true);
             return;
         }
 
         var enterDay = registerDay.toISOString().split("T")[0];
 
         const postData = { staff_name: newStaffName, enroll_date: enterDay };
-        const url = '/enrollment';
+        const url = "/enrollment";
         const response = await axiosInstance.post(url, postData);
         setConfirmMessage(response.data);
 
@@ -128,25 +137,8 @@ const Manage = ({ navigation }) => {
         );
     };
 
-    return (
-        <View style={styles.container}>
-            <AdminHeader nav={navigation} menuName="교직원 관리"></AdminHeader>
-
-            <View style={{ marginTop: 20, flex: 1, alignItems: "center" }}>
-                <FlatList
-                    data={staffInfo}
-                    numColumns={1}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <StaffCard name={item.name} date={item.registerDay} refresh={setRefresh} />
-                    )}
-                    bounces={false}
-                    contentContainerStyle={styles.listContent}
-                />
-            </View>
-            
-            <RectangleButton message="교직원 추가" onPress={toggleModal}></RectangleButton>
-
+    const renderAddStaff = () => {
+        return (
             <Modal isVisible={isModalVisible} onBackdropPress={toggleModal}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>교직원 추가</Text>
@@ -173,15 +165,44 @@ const Manage = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
             </Modal>
+        );
+    };
+
+    const renderDateModal = () => {
+        return (
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
                 mode="date"
                 onConfirm={handleDateConfirm}
                 onCancel={hideDatePicker}
             />
+        );
+    };
+
+    return (
+        <View style={styles.container}>
+            <AdminHeader nav={navigation} menuName="교직원 관리"></AdminHeader>
+
+            <View style={{ marginTop: 20, flex: 1, alignItems: "center" }}>
+                <FlatList
+                    data={staffInfo}
+                    numColumns={1}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <StaffCard name={item.name} date={item.registerDay} refresh={setRefresh} />
+                    )}
+                    bounces={false}
+                    contentContainerStyle={styles.listContent}
+                />
+            </View>
+
+            <RectangleButton message="교직원 추가" onPress={toggleModal}></RectangleButton>
 
             {renderAlert()}
             {viewSessionExpiration()}
+            {renderAddStaff()}
+            {renderDateModal()}
+            {wrong_name()}
         </View>
     );
 };
