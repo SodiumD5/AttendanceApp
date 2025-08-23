@@ -102,13 +102,14 @@ class ModifyTotalRest(BaseModel):
 def modify_rest(modifytotalrest:ModifyTotalRest, token: str = Depends(check_token)):
     manager_db.modify_rest_limit(modifytotalrest)
     
-class ModifyAttendenceData(BaseModel):
+class ModifyAttendanceData(BaseModel):
     name : str
     year : int
     month : int
     day : int
-    work_time : str
-    leave_time : str
-@router.put('/modification/attendence', status_code=204)
-def modfiy_attendence(modifyattendencedate:ModifyAttendenceData, token: str = Depends(check_token)):
-    print(modifyattendencedate)
+    work_time : str | None
+    leave_time : str | None
+    use_rest : str
+@router.post('/modification/attendance', status_code=204)
+def modfiy_attendance(modifyattendancedate:ModifyAttendanceData, token: str = Depends(check_token)):
+    manager_db.modify_staff_work_info(modifyattendancedate)

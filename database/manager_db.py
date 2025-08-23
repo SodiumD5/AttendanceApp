@@ -96,4 +96,82 @@ def modify_rest_limit(modifytotalrest:ModifyTotalRest):
     
     supabase.table('rest_limit').update({'limit': limit}) \
         .eq('name', name).eq('year', year).execute()
+
+class ModifyAttendanceData(BaseModel):
+    name : str
+    year : int
+    month : int
+    day : int
+    work_time : str | None
+    leave_time : str | None
+    use_rest : str
+def modify_staff_work_info(data:ModifyAttendanceData):
+    name = data.name
+    year = data.year
+    month = data.month
+    day = data.day
     
+    YYYYMMDD = f"{year}-{month}-{day}"
+    if data.work_time == "X":
+        work_time = None
+    else:
+        work_time = data.work_time
+    if data.leave_time == "X":
+        leave_time = None
+    else:
+        leave_time = data.leave_time
+    if data.use_rest == "연차":
+        category = "full"
+    elif data.use_rest == "반차":
+        category = "half"
+    else: 
+        category = "X"
+    
+    print(name, year, month, day)
+    print(YYYYMMDD)
+    print(work_time, leave_time, category)
+    #attendece부터 바꿈
+    attendance_update = {
+        "work_time" : work_time,
+        "leave_time" : leave_time,
+        "status" : "home"
+    }
+    supabase.table("attendance").update(attendance_update) \
+        .eq("name", name).eq("month", month).eq("day", day).execute()
+    #rest변경. 이게 많조분이지 슈발
+    #반차의 경우, 퇴근시각과 같도록 조정한다. (오전반차 고려 못 함.)
+    record = supabase.table("rest").select("category") \
+        .eq("date", YYYYMMDD).eq("name", name).execute().data
+    if record:
+        prev = record[0]["category"]
+    else:
+        prev = "X"
+    
+    if category == prev:
+        return
+    if prev == "X": #추가해야함
+        rest_insert = {
+            "name" : name, 
+            "date" : YYYYMMDD,
+            "time" : leave_time,
+            "category" : category
+        }
+        supabase.table("rest").insert(rest_insert).execute()
+    elif prev == "half": 
+        if category == "X": #행 제거
+            supabase.table("rest").delete().eq("name", name).eq("date", YYYYMMDD).execute()
+        elif category == "full": #시간 제거, full로 변경
+            rest_change = {
+                "time" : None,
+                "category" : "full"
+            }
+            supabase.table("rest").update(rest_change).eq("name", name).eq("date", YYYYMMDD).execute()
+    elif prev == "full":
+        if category == "X": #행 제거
+            supabase.table("rest").delete().eq("name", name).eq("date", YYYYMMDD).execute()
+        elif category == "half": #시간 추가, half로 변경
+            rest_change = {
+                "time" : leave_time,
+                "category" : "half"
+            }
+            supabase.table("rest").update(rest_change).eq("name", name).eq("date", YYYYMMDD).execute()

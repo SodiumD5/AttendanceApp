@@ -1,8 +1,16 @@
 import Modal from "react-native-modal";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import Colors from "./Colors";
+import RectangleButton from "./RectangleButton";
 
-const AlertModal = ({ isVisible, setIsVisible, title, bgColor, onClose = () => {} }) => {
+const AlertModal = ({
+    isVisible,
+    setIsVisible,
+    title,
+    bgColor = Colors.primary_red,
+    onClose = () => {},
+    meg = ""
+}) => {
     const close = () => {
         setIsVisible(!isVisible);
     };
@@ -16,17 +24,16 @@ const AlertModal = ({ isVisible, setIsVisible, title, bgColor, onClose = () => {
             }}>
             <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}>{title}</Text>
-                <TouchableOpacity
-                    style={{
-                        ...styles.modalButton,
-                        backgroundColor: bgColor,
-                    }}
+                {meg ? <Text style={styles.message}>{meg}</Text> : null}
+                <RectangleButton
+                    message="확인"
                     onPress={() => {
                         close();
                         onClose();
-                    }}>
-                    <Text style={styles.modalButtonText}>확인</Text>
-                </TouchableOpacity>
+                    }}
+                    buttonColor="red"
+                    buttontype="Modal"
+                />
             </View>
         </Modal>
     );
@@ -46,17 +53,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginBottom: 20,
     },
-    modalButton: {
-        width: "100%",
-        backgroundColor: Colors.primary_blue,
-        padding: 12,
-        borderRadius: 10,
-        alignItems: "center",
-        marginTop: 10,
-    },
-    modalButtonText: {
-        color: "white",
-        fontSize: 16,
-        fontWeight: "bold",
-    },
+    message: {
+        fontSize: 16
+    }
 });

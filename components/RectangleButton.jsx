@@ -13,6 +13,9 @@ const RectangleButton = ({ message, onPress, buttonColor = "purple", buttontype 
     } else if (buttonColor == "blue") {
         bgcolor = Colors.primary_blue;
         textcolor = "white";
+    } else if (buttonColor == "red"){
+        bgcolor = Colors.primary_red;
+        textcolor = "white";
     }
 
     let additionalContainerStyle = {};

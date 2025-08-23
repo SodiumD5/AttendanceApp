@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Pressable, FlatList, TouchableOpacity } from "react-native";
 import Modal from "react-native-modal";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 import Colors from "../components/Colors";
 import AdminHeader from "../layout/AdminHeader";
@@ -22,13 +23,11 @@ const MonthlyAttendance = ({ navigation }) => {
     const [showSearchModal, setShowSearchModal] = useState(false);
     const [titleMessage, setTitleMessage] = useState("검색조건을 설정해주세요");
     const [showAlertModal, setShowAlertModal] = useState(false);
-    const [showModifyModal, setShowModifyModal] = useState(false);
-    const [selectedItem, setSelectedItem] = useState();
-    const [modifyData, setModifyData] = useState({});
 
     const years = Array.from({ length: 76 }, (_, i) => 2025 + i);
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
+    //토큰 만료될 시 로그인 화면으로 튕김
     const [sessionExpiration, setSessionExpiration] = useState(false);
     const { token } = useTokenStore();
     useEffect(() => {
@@ -44,7 +43,10 @@ const MonthlyAttendance = ({ navigation }) => {
                 title={"세션이 만료되어 로그아웃 됩니다."}
                 bgColor={Colors.primary_red}
                 onClose={() => {
-                    navigation.replace("Login");
+                    navigation.reset({
+                        index: 1,
+                        routes: [{ name: "StartPage" }, { name: "Login" }],
+                    });
                 }}
             />
         );
@@ -102,46 +104,140 @@ const MonthlyAttendance = ({ navigation }) => {
         </TouchableOpacity>
     );
 
+    const [showModifyModal, setShowModifyModal] = useState(false);
+    const [showInvalidModify, setShowInvalidModify] = useState(false);
+
     const [workTimeModalVisible, setWorkTimeModalVisible] = useState(false);
     const [leaveTimeModalVisible, setLeaveTimeModalVisible] = useState(false);
     const [restModalVisible, setRestModalVisible] = useState(false);
+
+    const [selectedDay, setSelectedDay] = useState();
+    const [selectedWorkTime, setSelectedWorkTime] = useState();
+    const [selectedLeaveTime, setSelectedLeaveTime] = useState();
     const [selectedRest, setSelectedRest] = useState();
+
     const toggleModifyModal = ({ item }) => {
-        setSelectedItem(item);
+        //모달을 열 때만 초기정보 넣기
+        if (showModifyModal == false) {
+            setSelectedDay(item.day);
+            setSelectedWorkTime(item.work_time);
+            setSelectedLeaveTime(item.leave_time);
+            setSelectedRest(restText(item.rest));
+        }
         setShowModifyModal(!showModifyModal);
     };
-    const submitModifyData = async () => {
-        const url = "/modification/attendence";
-        await axiosInstance.put(url, modifyData);
+    const compareTime = () => {
+        //false면 불가능한 상황인거임
+        if (
+            selectedWorkTime === null ||
+            selectedLeaveTime === null ||
+            selectedWorkTime === "X" ||
+            selectedLeaveTime === "X"
+        ) {
+            return false;
+        }
 
-        toggleModifyModal();
+        const [workHour, workMinute] = selectedWorkTime.split(":").map(Number);
+        const [leaveHour, leaveMinute] = selectedLeaveTime.split(":").map(Number);
+
+        if (workHour * 60 + workMinute <= leaveHour * 60 + leaveMinute) {
+            return true;
+        } else {
+            return false;
+        }
     };
-    useEffect(() => {
-        if (selectedItem) {
-            //기본값 설정
-            setSelectedRest(restText(selectedItem.rest));
-            
-            const [day_int, trash] = selectedItem.day.split("일");
-            setModifyData({
+    const EnterModifyButton = async () => {
+        //변경하기 버튼 누를 때
+        if (selectedRest == "연차" || compareTime()) {
+            //연차이거나 출근시간이 퇴근시간을 앞서야함.
+            const url = "/modification/attendance";
+            const day_int = selectedDay.split("일")[0];
+            const postData = {
                 name: selectedStaff,
                 year: parseInt(selectedYear),
                 month: parseInt(selectedMonth),
                 day: parseInt(day_int),
-                work_time: "",
-                leave_time: "",
-            });
+                work_time: selectedRest === "연차" ? null : selectedWorkTime,
+                leave_time: selectedRest === "연차" ? null : selectedLeaveTime,
+                use_rest: selectedRest,
+            };
+
+            await axiosInstance.post(url, postData);
+            setShowModifyModal(!showModifyModal);
+            await handleSearch();
+        } else {
+            console.log("invalid input");
+            setShowInvalidModify(true);
         }
-    }, [selectedItem]);
-    const TimeComponent = ({ guideText, infoText, onPress }) => {
+    };
+
+    const invalidModal = () => {
         return (
-            <TouchableOpacity style={styles.ModifyModalTimeContainer} onPress={onPress}>
-                <Text style={styles.ModifyModalTimeText}>{guideText}</Text>
-                <Text style={styles.ModifyModalTimeText}>{infoText}</Text>
+            <AlertModal
+                isVisible={showInvalidModify}
+                setIsVisible={setShowInvalidModify}
+                title="올바른 시간을 입력하세요."
+                meg="출근 시간과 퇴근 시간이 입력되어야하고, 출근 시간이 반드시 퇴근 시간보다 빨라야합니다."
+            />
+        );
+    };
+
+    const TimeComponent = ({ guideText, infoText, onPress, disabled }) => {
+        //수정 모달의 각 버튼들
+        const textStyle = disabled
+            ? styles.ModifyModalTimeTextDisabled
+            : styles.ModifyModalTimeText;
+
+        return (
+            <TouchableOpacity
+                style={styles.ModifyModalTimeContainer}
+                onPress={onPress}
+                disabled={disabled}>
+                <Text style={textStyle}>{guideText}</Text>
+                <Text style={textStyle}>{infoText}</Text>
             </TouchableOpacity>
         );
     };
-    const renderWorkTimeModal = () => {};
-    const renderLeaveTimeModal = () => {};
+
+    const renderWorkTimeModal = () => {
+        return (
+            <DateTimePickerModal
+                isVisible={workTimeModalVisible}
+                mode="time"
+                onConfirm={(date) => {
+                    setWorkTimeModalVisible(false);
+                    setSelectedWorkTime(
+                        date.toLocaleTimeString("ko-KR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                        })
+                    );
+                }}
+                onCancel={() => setWorkTimeModalVisible(false)}
+            />
+        );
+    };
+    const renderLeaveTimeModal = () => {
+        return (
+            <DateTimePickerModal
+                isVisible={leaveTimeModalVisible}
+                mode="time"
+                onConfirm={(date) => {
+                    setLeaveTimeModalVisible(false);
+                    setSelectedLeaveTime(
+                        date.toLocaleTimeString("ko-KR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                        })
+                    );
+                }}
+                onCancel={() => setLeaveTimeModalVisible(false)}
+            />
+        );
+    };
+
     const renderRestModal = () => {
         const RestData = ["출근", "반차", "연차"];
         return (
@@ -156,54 +252,60 @@ const MonthlyAttendance = ({ navigation }) => {
             />
         );
     };
-    const toggleRestModal = () => {
-        setRestModalVisible(!restModalVisible);
+
+    const transformText = (timeData) => {
+        let time_text;
+        if (timeData) {
+            const [hour, minute] = timeData.split(":");
+            time_text = `${hour}시 ${minute}분`;
+        } else {
+            time_text = "X";
+        }
+        return time_text;
     };
 
     const ModifyModal = () => {
-        if (!selectedItem) {
-            return null;
-        }
-
-        const title = `${selectedItem.day} 출근부 수정`;
-        let work_text;
-        let leave_text;
-        if (selectedItem.work_time) {
-            const [work_hour, work_minute] = selectedItem.work_time.split(":");
-            work_text = `${work_hour}시 ${work_minute}분`;
-        } else {
-            work_text = "X";
-        }
-        if (selectedItem.leave_time) {
-            const [leave_hour, leave_minute] = selectedItem.leave_time.split(":");
-            leave_text = `${leave_hour}시 ${leave_minute}분`;
-        } else {
-            leave_text = "X";
-        }
+        const title = `${selectedDay} 출근부 수정`;
+        const isLeave = selectedRest === "연차";
 
         return (
             <Modal isVisible={showModifyModal} onBackdropPress={toggleModifyModal}>
                 <View style={styles.ModifyModalContainer}>
                     <Text style={styles.ModifyModalTitle}>{title}</Text>
 
-                    <TimeComponent guideText="출근 시각 : " infoText={work_text}></TimeComponent>
-                    <TimeComponent guideText="퇴근 시각 : " infoText={leave_text}></TimeComponent>
+                    <TimeComponent
+                        guideText="출근 시각 : "
+                        infoText={isLeave ? "X" : transformText(selectedWorkTime)}
+                        onPress={isLeave ? null : () => setWorkTimeModalVisible(true)}
+                        disabled={isLeave}
+                    />
+                    <TimeComponent
+                        guideText="퇴근 시각 : "
+                        infoText={isLeave ? "X" : transformText(selectedLeaveTime)}
+                        onPress={isLeave ? null : () => setLeaveTimeModalVisible(true)}
+                        disabled={isLeave}
+                    />
                     <TimeComponent
                         guideText="휴가 : "
                         infoText={selectedRest}
-                        onPress={toggleRestModal}></TimeComponent>
+                        onPress={() => {
+                            setRestModalVisible(!restModalVisible);
+                        }}
+                    />
 
                     <RectangleButton
                         message="변경하기"
-                        onPress={submitModifyData}
-                        buttontype="modal"></RectangleButton>
+                        onPress={EnterModifyButton}
+                        buttontype="modal"
+                    />
                     <RectangleButton
                         message="취소"
                         onPress={() => {
                             toggleModifyModal({ item: null });
                         }}
                         buttonColor="white"
-                        buttontype="modal"></RectangleButton>
+                        buttontype="modal"
+                    />
                 </View>
             </Modal>
         );
@@ -341,6 +443,10 @@ const MonthlyAttendance = ({ navigation }) => {
             {ModifyModal()}
 
             {renderRestModal()}
+            {renderWorkTimeModal()}
+            {renderLeaveTimeModal()}
+
+            {invalidModal()}
         </View>
     );
 };
@@ -510,5 +616,9 @@ const styles = StyleSheet.create({
     },
     ModifyModalTimeText: {
         fontSize: 16,
+    },
+    ModifyModalTimeTextDisabled: {
+        fontSize: 16,
+        color: Colors.inactive_text,
     },
 });
