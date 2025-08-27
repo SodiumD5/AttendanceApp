@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Pressable, FlatList, TextInput } from "react-native";
-import Modal from "react-native-modal";
 
 import Colors from "../components/Colors";
 import AdminHeader from "../layout/AdminHeader";
@@ -59,7 +58,7 @@ const AnnualLedger = ({ navigation }) => {
 
     const handleSearch = async () => {
         //연차 내역 가져오기
-        var url = `/rest/${selectedStaff}/${selectedYear}`;
+        var url = `/manager/rest/${selectedStaff}/${selectedYear}`;
         const rest_records = await axiosInstance.get(url);
         const response_data = rest_records.data;
 
@@ -67,7 +66,7 @@ const AnnualLedger = ({ navigation }) => {
         setRestCount(response_data["count"]);
 
         //총 연차 일수 가져오기 (없으면 생성)
-        var url = "/rest/limit";
+        var url = "/manager/rest/limit";
         const postData = {
             name: selectedStaff,
             year: selectedYear,
@@ -99,7 +98,7 @@ const AnnualLedger = ({ navigation }) => {
     //전체 휴가 횟수 바꾸기
     const onChangeLimit = async (text) => {
         setTotalRestCount(text);
-        const url = "/modification/rest";
+        const url = "/manager/modification/rest";
         const data = {
             name: selectedStaff,
             year: selectedYear,

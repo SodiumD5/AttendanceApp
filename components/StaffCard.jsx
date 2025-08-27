@@ -37,7 +37,7 @@ export default function StaffCard({ name, date, refresh }) {
 
     const handleDelete = async () => {
         //강제 랜더링
-        const url = `${name}/deactivate`;
+        const url = `/manager/${name}/deactivate`;
         await axiosInstance.put(url);
         refresh((prevRefresh) => prevRefresh + 1);
         toggleConfirm();
@@ -72,7 +72,7 @@ export default function StaffCard({ name, date, refresh }) {
             date: enterDay,
         };
 
-        const url = "/modification/enterDate";
+        const url = "/manager/modification/enterDate";
         await axiosInstance.put(url, postData);
         refresh((prevRefresh) => prevRefresh + 1);
     };

@@ -3,7 +3,6 @@ import Colors from "../components/Colors";
 
 import AdminHeader from "../layout/AdminHeader";
 import BigButton from "../components/BigButton";
-import ShortButton from "../components/ShortButton";
 import RectangleButton from "../components/RectangleButton";
 
 const AdminMenu = ({ navigation }) => {

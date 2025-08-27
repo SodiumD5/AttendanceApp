@@ -26,7 +26,7 @@ const RectangleButton = ({ message, onPress, buttonColor = "purple", buttontype 
             bottom: 30,
             width: "80%",
         };
-    } else {
+    } else if (buttontype === "modal") {
         additionalContainerStyle = {
             width: "100%",
             padding: 12,
@@ -34,8 +34,7 @@ const RectangleButton = ({ message, onPress, buttonColor = "purple", buttontype 
             marginTop: 10,
         };
         fontSize = 16;
-    }
-
+    } 
     return (
         <TouchableOpacity
             style={[styles.rectangeButton, additionalContainerStyle, { backgroundColor: bgcolor }]}

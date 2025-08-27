@@ -102,7 +102,7 @@ const Manage = ({ navigation }) => {
         var enterDay = registerDay.toISOString().split("T")[0];
 
         const postData = { staff_name: newStaffName, enroll_date: enterDay };
-        const url = "/enrollment";
+        const url = "/manager/enrollment";
         const response = await axiosInstance.post(url, postData);
         setConfirmMessage(response.data);
 

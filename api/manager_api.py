@@ -8,9 +8,6 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
-ALGORITHM = "HS256"
-
 router = APIRouter()
 
 def auth_fail():
@@ -20,6 +17,8 @@ def auth_fail():
     )
 
 def check_token(authorization: Optional[str] = Header(None)):
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    ALGORITHM = "HS256"
     if not authorization:
         auth_fail()
         return

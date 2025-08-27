@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ year }}년 {{ month }}월 출근부</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            body, html {
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .table-container {
+                width: 100%;
+                overflow-x: auto;
+            }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                text-align: center;
+                font-family: sans-serif;
+                border: 2px solid black;
+                table-layout: fixed;
+                min-width: 600px;
+                margin: 20px;
+            }
+            th, td {
+                border: 1px solid black;
+                padding: 12px 8px;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+            .day {
+                font-size: 10px;
+            }
+            .date {
+                font-weight: bold;
+            }
+            .header-title {
+                font-size: 24px;
+                font-weight: bold;
+                padding: 20px 0;
+            }
+            .label {
+                width: 50px;
+            }
+            .day-column {
+                width: 25px;
+            }
+            .total-column {
+                width: 50px;
+            }
+            .saturday {
+                background-color: #e6f3ff;
+            }
+            .sunday {
+                background-color: #ffe6e6;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header-title">{{ year }}년 {{ month }}월분 출근부</div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="label" rowspan="2">이름</th>
+                        {% for day_data in days_data %}
+                        <th class="day-column date {{ day_data.class }}">{{ day_data.day }}</th>
+                        {% endfor %}
+                        <th class="total-column" rowspan="2">출근</th>
+                        <th class="total-column" rowspan="2">연차</th>
+                    </tr>
+                    <tr>
+                        {% for day_data in days_data %}
+                        <th class="day {{ day_data.class }}">{{ day_data.weekday_text }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(2) %}
+                    <tr>
+                        <td></td>
+                        {% for day_data in days_data %}
+                        <td class="{{ day_data.class }}"></td>
+                        {% endfor %}
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>

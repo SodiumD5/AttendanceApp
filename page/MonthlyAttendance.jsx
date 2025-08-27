@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Pressable, FlatList, TouchableOpacity } from "react-native";
+import {
+    StyleSheet,
+    View,
+    Text,
+    Pressable,
+    FlatList,
+    TouchableOpacity,
+    Linking,
+} from "react-native";
 import Modal from "react-native-modal";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { WebView } from "react-native-webview";
 
 import Colors from "../components/Colors";
 import AdminHeader from "../layout/AdminHeader";
@@ -10,6 +19,7 @@ import axiosInstance from "../api/axios";
 import useTokenStore from "../store/tokenStore";
 import RectangleButton from "../components/RectangleButton";
 import PickerModal from "../components/PickerModal";
+import BottomDownload from "../components/BottomDownload";
 
 const MonthlyAttendance = ({ navigation }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -66,7 +76,7 @@ const MonthlyAttendance = ({ navigation }) => {
         setTitleMessage(`${selectedYear}년 ${selectedMonth}월 ${selectedStaff} 출근부`);
 
         const response = await axiosInstance.get(
-            `/attendance/?name=${selectedStaff}&year=${selectedYear}&month=${selectedMonth}`
+            `/manager/attendance/?name=${selectedStaff}&year=${selectedYear}&month=${selectedMonth}`
         );
         setSearchResult(response.data);
     };
@@ -150,7 +160,7 @@ const MonthlyAttendance = ({ navigation }) => {
         //변경하기 버튼 누를 때
         if (selectedRest == "연차" || compareTime()) {
             //연차이거나 출근시간이 퇴근시간을 앞서야함.
-            const url = "/modification/attendance";
+            const url = "/manager/modification/attendance";
             const day_int = selectedDay.split("일")[0];
             const postData = {
                 name: selectedStaff,
@@ -406,6 +416,18 @@ const MonthlyAttendance = ({ navigation }) => {
         );
     };
 
+    const handleOpenWebview = async () => {
+        try {
+            const url = `/static/attendance/${selectedYear}/${selectedMonth}`;
+            const response = await axiosInstance.get(url);
+            const signedUrl = response.data.url;
+
+            await Linking.openURL(signedUrl);
+        } catch (error) {
+            console.error("웹뷰 HTML 가져오기 오류:", error);
+        }
+    };
+
     return (
         <View style={styles.container}>
             <AdminHeader nav={navigation} menuName="월간 출근부"></AdminHeader>
@@ -433,6 +455,9 @@ const MonthlyAttendance = ({ navigation }) => {
                 )}
                 style={styles.listContainer}
             />
+
+            {/* 하단 웹뷰, 다운로드 버튼 로딩 */}
+            <BottomDownload webview={handleOpenWebview} isVisible={searchResult.length > 0} />
 
             {renderSearchModal()}
             {renderYearPicker()}
@@ -620,5 +645,14 @@ const styles = StyleSheet.create({
     ModifyModalTimeTextDisabled: {
         fontSize: 16,
         color: Colors.inactive_text,
+    },
+    webviewModalContainer: {
+        flex: 1,
+        backgroundColor: "white",
+        padding: 20,
+        borderRadius: 10,
+    },
+    webview: {
+        flex: 1,
     },
 });

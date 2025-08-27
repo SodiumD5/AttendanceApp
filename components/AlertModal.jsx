@@ -32,7 +32,7 @@ const AlertModal = ({
                         onClose();
                     }}
                     buttonColor="red"
-                    buttontype="Modal"
+                    buttontype="modal"
                 />
             </View>
         </Modal>
