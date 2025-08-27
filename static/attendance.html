@@ -4,7 +4,8 @@
         <title>{{ year }}년 {{ month }}월 출근부</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
-            body, html {
+            body,
+            html {
                 margin: 0;
                 padding: 0;
             }
@@ -12,10 +13,11 @@
                 display: flex;
                 flex-direction: column;
                 align-items: center;
+                text-align: center;
             }
             .table-container {
-                width: 100%;
-                overflow-x: auto;
+                width: 99%;
+                overflow-x: visible;
             }
             table {
                 border-collapse: collapse;
@@ -24,12 +26,15 @@
                 font-family: sans-serif;
                 border: 2px solid black;
                 table-layout: fixed;
-                min-width: 600px;
-                margin: 20px;
+                margin: 10px;
+                min-width: 0;
             }
-            th, td {
+            th,
+            td {
                 border: 1px solid black;
-                padding: 12px 8px;
+                padding: 15px 0px;
+                text-align: center;
+                font-size: 10px;
             }
             th {
                 background-color: #f2f2f2;
@@ -46,13 +51,14 @@
                 padding: 20px 0;
             }
             .label {
-                width: 50px;
+                width: 60px;
+                text-align: center;
             }
             .day-column {
-                width: 25px;
+                width: 26px;
             }
             .total-column {
-                width: 50px;
+                width: 25px;
             }
             .saturday {
                 background-color: #e6f3ff;
@@ -63,7 +69,7 @@
         </style>
     </head>
     <body>
-        <div class="header-title">{{ year }}년 {{ month }}월분 출근부</div>
+        <div class="header-title">{{ year }}년 {{ month }}월 출근부</div>
         <div class="table-container">
             <table>
                 <thead>
@@ -82,14 +88,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for i in range(2) %}
+                    {% for work_data in works_data %}
                     <tr>
-                        <td></td>
+                        <td>{{ work_data.name }}</td>
                         {% for day_data in days_data %}
-                        <td class="{{ day_data.class }}"></td>
+                        <td class="{{ day_data.class }}">
+                            {{ (work_data.data)[loop.index0].rest }}
+                        </td>
                         {% endfor %}
-                        <td>-</td>
-                        <td>-</td>
+                        <td>{{ work_data.work_day }}</td>
+                        <td>{{ work_data.rest_day }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

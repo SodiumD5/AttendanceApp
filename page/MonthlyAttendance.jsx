@@ -7,10 +7,10 @@ import {
     FlatList,
     TouchableOpacity,
     Linking,
+    Platform,
 } from "react-native";
 import Modal from "react-native-modal";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { WebView } from "react-native-webview";
 
 import Colors from "../components/Colors";
 import AdminHeader from "../layout/AdminHeader";
@@ -20,6 +20,10 @@ import useTokenStore from "../store/tokenStore";
 import RectangleButton from "../components/RectangleButton";
 import PickerModal from "../components/PickerModal";
 import BottomDownload from "../components/BottomDownload";
+
+//파일 다운로드
+import RNFetchBlob from "rn-fetch-blob";
+import { PermissionsAndroid } from "react-native";
 
 const MonthlyAttendance = ({ navigation }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -416,16 +420,48 @@ const MonthlyAttendance = ({ navigation }) => {
         );
     };
 
-    const handleOpenWebview = async () => {
-        try {
-            const url = `/static/attendance/${selectedYear}/${selectedMonth}`;
-            const response = await axiosInstance.get(url);
-            const signedUrl = response.data.url;
+    const openWebview = async () => {
+        const url = `/static/attendance/${selectedYear}/${selectedMonth}/web`;
+        const response = await axiosInstance.get(url);
+        const signedUrl = response.data.url;
 
-            await Linking.openURL(signedUrl);
-        } catch (error) {
-            console.error("웹뷰 HTML 가져오기 오류:", error);
+        await Linking.openURL(signedUrl);
+    };
+
+    const downloadPdf = async () => {
+        if (Platform.OS === "android") {
+            await PermissionsAndroid.requestMultiple([
+                PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+            ]).then((result) => {
+                if (
+                    result["android.permission.POST_NOTIFICATIONS"] === "granted"
+                ) {
+                    console.log("파일 접근 권한 허용");
+                } else {
+                    console.log("권한 거절됨");
+                }
+            });
         }
+
+        const url = `/static/attendance/${selectedYear}/${selectedMonth}/pdf`;
+        const response = await axiosInstance.get(url);
+        const signedUrl = response.data.url;
+
+        const { config } = RNFetchBlob;
+        const fileName = `${selectedYear}년_${selectedMonth}월_출근부.pdf`;
+
+        const options = {
+            addAndroidDownloads: {
+                useDownloadManager: true,
+                notification: true,
+                title: fileName,
+                description: "월간 출근부 파일을 다운로드합니다.",
+                mime: "application/pdf",
+                mediaScannable: true,
+            },
+        };
+
+        await config(options).fetch("GET", signedUrl);
     };
 
     return (
@@ -457,7 +493,11 @@ const MonthlyAttendance = ({ navigation }) => {
             />
 
             {/* 하단 웹뷰, 다운로드 버튼 로딩 */}
-            <BottomDownload webview={handleOpenWebview} isVisible={searchResult.length > 0} />
+            <BottomDownload
+                webview={openWebview}
+                download={downloadPdf}
+                isVisible={searchResult.length > 0}
+            />
 
             {renderSearchModal()}
             {renderYearPicker()}

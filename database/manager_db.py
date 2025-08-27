@@ -127,9 +127,6 @@ def modify_staff_work_info(data:ModifyAttendanceData):
     else: 
         category = "X"
     
-    print(name, year, month, day)
-    print(YYYYMMDD)
-    print(work_time, leave_time, category)
     #attendece부터 바꿈
     attendance_update = {
         "work_time" : work_time,

@@ -20,7 +20,9 @@
                 "foregroundImage": "./assets/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
             },
-            "edgeToEdgeEnabled": true
+            "edgeToEdgeEnabled": true,
+            "package": "com.sodiumd.Attendance",
+            "permissions": ["POST_NOTIFICATIONS"]
         },
         "web": {
             "favicon": "./assets/favicon.png"
