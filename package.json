@@ -1,5 +1,5 @@
 {
-  "name": "Attendance",
+  "name": "출근부",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -16,6 +16,7 @@
     "date-fns": "^4.1.0",
     "expo": "~53.0.20",
     "expo-blur": "~14.1.5",
+    "expo-dev-client": "~5.2.4",
     "expo-status-bar": "~2.2.3",
     "lodash": "^4.17.21",
     "react": "19.0.0",

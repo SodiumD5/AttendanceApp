@@ -31,7 +31,7 @@ const AlertModal = ({
                         close();
                         onClose();
                     }}
-                    buttonColor="red"
+                    buttonColor={bgColor == Colors.primary_red ? "red" : "purple"}
                     buttontype="modal"
                 />
             </View>

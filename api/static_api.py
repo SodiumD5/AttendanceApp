@@ -25,10 +25,11 @@ def make_signed(year : int, month : int, type : str, token: str = Depends(manage
     }
     signed_token = signer.dumps(payload)
     
+    baseUrl = "http://192.168.2.2:8081"
     if type == "web":
-        url = f"http://10.0.2.2:8000/static/attendance-web/{signed_token}"
+        url = f"{baseUrl}/static/attendance-web/{signed_token}"
     elif type == "pdf":
-        url = f"http://10.0.2.2:8000/static/attendance-pdf/{signed_token}"
+        url = f"{baseUrl}/static/attendance-pdf/{signed_token}"
     else:
         return
     return {"url": url}

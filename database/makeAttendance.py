@@ -44,7 +44,7 @@ def makeAttendace(year, month):
         })
         #일 정보
         work_data_one_person = manager_db.month_attendance_data(now_name, year, month)
-        work_data_month = [{"rest": ""} for _ in range(len(days_data))]
+        work_data_month = [{"rest": "", "work_time" : "", "leave_time" : ""} for _ in range(len(days_data))]
         
         work_day = 0
         rest_day = 0
@@ -60,7 +60,13 @@ def makeAttendace(year, month):
             elif now_rest == "full":
                 rest_ko = "연차"
                 rest_day += 1
-            work_data_month[now_day] = {"rest" : rest_ko}
+            
+            work_time = ""
+            leave_time = ""
+            if now_rest != "full":
+                work_time, leave_time = manager_db.find_day_work_time(year, month, now_day, now_name)
+                
+            work_data_month[now_day] = {"rest" : rest_ko, "work_time" : work_time, "leave_time" : leave_time}
         if int(rest_day) == rest_day:
             rest_day = int(rest_day)
         work_data.append({"name" : now_name, "data" : work_data_month, "work_day" : work_day, "rest_day" : rest_day})

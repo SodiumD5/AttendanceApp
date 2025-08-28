@@ -172,3 +172,9 @@ def modify_staff_work_info(data:ModifyAttendanceData):
                 "category" : "half"
             }
             supabase.table("rest").update(rest_change).eq("name", name).eq("date", YYYYMMDD).execute()
+
+def find_day_work_time(year, month, day, name):
+    record = supabase.table("attendance").select("*").eq('name', name).eq('year', year) \
+        .eq('month', month).eq('day', day).execute().data
+    return record[0]["work_time"], record[0]["leave_time"]
+    

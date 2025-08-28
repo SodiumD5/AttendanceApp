@@ -7,7 +7,9 @@ import useTokenStore from "../store/tokenStore";
 import AlertModal from "../components/AlertModal";
 import axiosInstance from "../api/axios";
 import PickerModal from "../components/PickerModal";
-import BottomDownload from "../components/BottomDownload";
+import useUrlStore from "../store/urlStore";
+
+const BaseUrl = useUrlStore.getState().BaseUrl;
 
 const AnnualLedger = ({ navigation }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -49,7 +51,7 @@ const AnnualLedger = ({ navigation }) => {
 
     useEffect(() => {
         const getStaffData = async () => {
-            const response = await fetch("http://10.0.2.2:8000/staff/active");
+            const response = await fetch(`${BaseUrl}/staff/active`);
             const staff = await response.json();
             setStaffList(staff);
         };

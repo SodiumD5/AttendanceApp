@@ -1,8 +1,10 @@
 import axios from "axios";
 import useTokenStore from "../store/tokenStore";
+import useUrlStore from "../store/urlStore";
 
+const BaseUrl = useUrlStore.getState().BaseUrl;
 const axiosInstance = axios.create({
-    baseURL: "http://10.0.2.2:8000/",
+    baseURL: BaseUrl,
 });
 
 //백으로 전송 전에 인터셉트함

@@ -4,11 +4,14 @@
         "slug": "Attendance",
         "version": "1.0.0",
         "orientation": "portrait",
-        "icon": "./assets/icon.png",
+        "icon": {
+            "foregroundImage": "./assets/calendar.png",
+            "resizeMode": "contain"
+        },
         "staffInterfaceStyle": "light",
         "newArchEnabled": true,
         "splash": {
-            "image": "./assets/splash-icon.png",
+            "image": "./assets/calendar.png",
             "resizeMode": "contain",
             "backgroundColor": "#ffffff"
         },
@@ -17,7 +20,7 @@
         },
         "android": {
             "adaptiveIcon": {
-                "foregroundImage": "./assets/adaptive-icon.png",
+                "foregroundImage": "./assets/calendar.png",
                 "backgroundColor": "#ffffff"
             },
             "edgeToEdgeEnabled": true,
@@ -25,7 +28,12 @@
             "permissions": ["POST_NOTIFICATIONS"]
         },
         "web": {
-            "favicon": "./assets/favicon.png"
+            "favicon": "./assets/calendar.png"
+        },
+        "extra": {
+            "eas": {
+                "projectId": "7e535b21-1f2b-4bb5-b29a-2c9d95768bc8"
+            }
         }
     }
 }

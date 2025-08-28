@@ -4,6 +4,9 @@ import Colors from "../components/Colors";
 
 import LongButton from "../components/LongButton";
 import GoBack from "../components/GoBack";
+import useUrlStore from "../store/urlStore";
+
+const BaseUrl = useUrlStore.getState().BaseUrl;
 
 const Attendance = ({ navigation, route }) => {
     const { employeeName } = route.params;
@@ -27,7 +30,7 @@ const Attendance = ({ navigation, route }) => {
             status: changedStatus,
         };
 
-        await fetch("http://10.0.2.2:8000/staff/changing-state", {
+        await fetch(`${BaseUrl}/staff/changing-state`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -53,7 +56,7 @@ const Attendance = ({ navigation, route }) => {
             time: category == "half" ? now_time : null,
             category: category,
         };
-        await fetch("http://10.0.2.2:8000/staff/using-rest", {
+        await fetch(`${BaseUrl}/staff/using-rest`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -65,7 +68,7 @@ const Attendance = ({ navigation, route }) => {
     const fetchWorkState = async (Datetime) => {
         //페이지 첫 로딩할 때, 상태 반영
         try {
-            const url = `http://10.0.2.2:8000/staff/state/?name=${employeeName}&year=${Datetime.year}&month=${Datetime.month}&day=${Datetime.day}`;
+            const url = `${BaseUrl}/staff/state/?name=${employeeName}&year=${Datetime.year}&month=${Datetime.month}&day=${Datetime.day}`;
             const response = await fetch(url);
             const response_body = await response.json();
             
@@ -78,7 +81,7 @@ const Attendance = ({ navigation, route }) => {
 
     const fetchDatetime = async () => {
         try {
-            const response = await fetch("http://10.0.2.2:8000/staff/datetime");
+            const response = await fetch(`${BaseUrl}/staff/datetime`);
             const data = await response.json();
             setDatetime(data);
 

@@ -25,9 +25,9 @@ const styles = StyleSheet.create({
         width: 130,
         height: 130,
         borderRadius: 20,
-        backgroundColor: "#E0E0E0",
-        top: 5,
-        left: 5,
+        backgroundColor: "#0D98BA",
+        top: 2,
+        left: 2,
     },
 
     roundButtonWrapper: {
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
         width: 130,
         height: 130,
         borderRadius: 20,
-        backgroundColor: Colors.primary_blue,
+        backgroundColor: Colors.primary_mint,
         justifyContent: "center",
         alignItems: "center",
         top: 0,

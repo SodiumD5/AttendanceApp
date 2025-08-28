@@ -20,6 +20,9 @@ import useTokenStore from "../store/tokenStore";
 import RectangleButton from "../components/RectangleButton";
 import PickerModal from "../components/PickerModal";
 import BottomDownload from "../components/BottomDownload";
+import useUrlStore from "../store/urlStore";
+
+const BaseUrl = useUrlStore.getState().BaseUrl;
 
 //파일 다운로드
 import RNFetchBlob from "rn-fetch-blob";
@@ -68,7 +71,7 @@ const MonthlyAttendance = ({ navigation }) => {
 
     useEffect(() => {
         const getStaffData = async () => {
-            const response = await fetch("http://10.0.2.2:8000/staff/active");
+            const response = await fetch(`${BaseUrl}/staff/active`);
             const staff = await response.json();
             setStaffList(staff);
         };
@@ -448,7 +451,7 @@ const MonthlyAttendance = ({ navigation }) => {
         const signedUrl = response.data.url;
 
         const { config } = RNFetchBlob;
-        const fileName = `${selectedYear}년_${selectedMonth}월_출근부.pdf`;
+        const fileName = `${selectedYear}년 ${selectedMonth}월 출근부.pdf`;
 
         const options = {
             addAndroidDownloads: {

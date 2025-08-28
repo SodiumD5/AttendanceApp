@@ -8,6 +8,7 @@ const Colors = {
     primary_gray: "#D9D9D9",
     background: "#F9F9F9",
     text_gray: "#333333",
+    primary_mint : "#88ceeb",
 
     inactive_bg: "#BDBDBD",
     inactive_text: "#808080",

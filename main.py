@@ -10,4 +10,4 @@ app.include_router(static_api.router, prefix="/static", tags=['static'])
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8081, reload=True)

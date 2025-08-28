@@ -10,6 +10,9 @@ import AlertModal from "../components/AlertModal";
 import useTokenStore from "../store/tokenStore";
 import axiosInstance from "../api/axios";
 import RectangleButton from "../components/RectangleButton";
+import useUrlStore from "../store/urlStore";
+
+const BaseUrl = useUrlStore.getState().BaseUrl;
 
 const Manage = ({ navigation }) => {
     const [staffInfo, setStaffInfo] = useState([]);
@@ -49,7 +52,7 @@ const Manage = ({ navigation }) => {
     useEffect(() => {
         const getStaffList = async () => {
             try {
-                const response = await fetch("http://10.0.2.2:8000/staff/active");
+                const response = await fetch(`${BaseUrl}/staff/active`);
                 const info = await response.json();
                 setStaffInfo(info);
             } catch (e) {

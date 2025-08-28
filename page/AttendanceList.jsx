@@ -5,6 +5,9 @@ import IconM from "react-native-vector-icons/MaterialCommunityIcons";
 import Colors from "../components/Colors";
 import RoundButton from "../components/RoundButton";
 import GoBack from "../components/GoBack";
+import useUrlStore from "../store/urlStore";
+
+const BaseUrl = useUrlStore.getState().BaseUrl;
 
 const AttendanceList = ({ navigation }) => {
     const [staffInfo, setStaffInfo] = useState();
@@ -12,7 +15,7 @@ const AttendanceList = ({ navigation }) => {
     useEffect(() => {
         const getStaffList = async () => {
             try {
-                const response = await fetch("http://10.0.2.2:8000/staff/active");
+                const response = await fetch(`${BaseUrl}/staff/active`);
                 const info = await response.json();
                 setStaffInfo(info);
             } catch (e) {

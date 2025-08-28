@@ -7,6 +7,9 @@ import GoBack from "../components/GoBack";
 import useTokenStore from "../store/tokenStore";
 import AlertModal from "../components/AlertModal";
 import RectangleButton from "../components/RectangleButton";
+import useUrlStore from "../store/urlStore";
+
+const BaseUrl = useUrlStore.getState().BaseUrl;
 
 const Login = ({ navigation }) => {
     const [inputId, setinputId] = useState("");
@@ -37,7 +40,7 @@ const Login = ({ navigation }) => {
         };
 
         try {
-            const url = "http://10.0.2.2:8000/login/info";
+            const url = `${BaseUrl}/login/info`;
             const response = await fetch(url, {
                 method: "POST",
                 headers: {
@@ -72,7 +75,7 @@ const Login = ({ navigation }) => {
                 useNativeDriver: false,
             }).start();
             Animated.timing(buttonBottom, {
-                toValue: e.endCoordinates.height - 130,
+                toValue: e.endCoordinates.height - 200,
                 duration: 250,
                 useNativeDriver: false,
             }).start();

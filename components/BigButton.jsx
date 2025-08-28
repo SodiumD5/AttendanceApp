@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 10,
         backgroundColor: "#8a8a8aff",
-        top: 3,
-        left: 3,
+        top: 2,
+        left: 2,
     },
 
     buttonWrapper: {
