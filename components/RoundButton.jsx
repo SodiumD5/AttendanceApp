@@ -14,16 +14,17 @@ export default function RoundButton({ context, wrapperStyle, textStyle, onPress 
 
 const styles = StyleSheet.create({
     buttonContainer: {
-        width: 140,
-        height: 140,
+        width: 100,
+        height: 100,
         position: "relative",
-        margin: 15,
+        margin: 10,
+        marginVertical: 20,
     },
 
     ButtonShadow: {
         position: "absolute",
-        width: 130,
-        height: 130,
+        width: 100,
+        height: 100,
         borderRadius: 20,
         backgroundColor: "#0D98BA",
         top: 2,
@@ -32,8 +33,8 @@ const styles = StyleSheet.create({
 
     roundButtonWrapper: {
         position: "absolute",
-        width: 130,
-        height: 130,
+        width: 100,
+        height: 100,
         borderRadius: 20,
         backgroundColor: Colors.primary_mint,
         justifyContent: "center",

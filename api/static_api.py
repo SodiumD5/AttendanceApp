@@ -25,7 +25,7 @@ def make_signed(year : int, month : int, type : str, token: str = Depends(manage
     }
     signed_token = signer.dumps(payload)
     
-    baseUrl = "http://192.168.2.2:8081"
+    baseUrl = os.environ.get("URL")
     if type == "web":
         url = f"{baseUrl}/static/attendance-web/{signed_token}"
     elif type == "pdf":
@@ -71,9 +71,9 @@ async def download_attendance_pdf(signed_token: str):
 
         html = makeAttendance.makeAttendace(year, month)
         
-        # wkhtmltopdf 실행 파일 경로 지정
-        path_wkhtmltopdf = 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
-        config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+        # # wkhtmltopdf 실행 파일 경로 지정 (도커라서 이제 필요 없음)
+        # path_wkhtmltopdf = 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
+        # config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 
         options = {
             'encoding': 'utf-8',
@@ -84,9 +84,9 @@ async def download_attendance_pdf(signed_token: str):
             'margin-bottom': '5mm',
             'margin-left': '5mm',
             'margin-right': '5mm',
-            'zoom' : 0.95
+            'zoom' : 0.95,
         }
-        pdf_bytes = pdfkit.from_string(html, False, configuration=config, options=options)
+        pdf_bytes = pdfkit.from_string(html, False, options=options)
 
         # 파일명 인코딩
         filename = f"{year}년 {month}월 출근부.pdf"

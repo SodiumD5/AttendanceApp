@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
 
     title: {
         fontSize: 40,
-        fontWeight: 900,
+        fontWeight: "bold",
         marginBottom: 10,
     },
 

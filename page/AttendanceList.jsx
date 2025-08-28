@@ -39,7 +39,7 @@ const AttendanceList = ({ navigation }) => {
             <Text style={styles.title}>출근 체크</Text>
             <FlatList
                 data={staffInfo}
-                numColumns={2}
+                numColumns={3}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                     <RoundButton
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 40,
         fontWeight: 800,
-        margin: 27,
+        margin: 20,
 
         marginBottom: 50,
         marginTop: 120,
