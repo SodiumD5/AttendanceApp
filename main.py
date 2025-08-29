@@ -4,6 +4,10 @@ import asyncio
 import httpx
 import uvicorn
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+URL = os.environ.get("URL")
 
 app = FastAPI()
 
@@ -21,8 +25,7 @@ async def keep_awake():
     while True:
         try:
             async with httpx.AsyncClient() as client:
-                url = os.environ.get("URL")
-                await client.get(f"{url}/ping")
+                await client.get(f"{URL}/ping")
         except Exception as e:
             print("Keep-alive failed:", e)
         await asyncio.sleep(60) 
