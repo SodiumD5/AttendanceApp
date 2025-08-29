@@ -49,3 +49,7 @@ class RestData(BaseModel):
 @router.post('/using-rest', status_code=204)
 def using_rest(restdata:RestData):
     staff_db.record_rest(restdata)
+
+@router.get("/ping", status_code=200)
+async def ping():
+    return {"message": "pong"}

@@ -17,15 +17,11 @@ app.include_router(manager_api.router, prefix="/manager", tags=['manager'])
 app.include_router(static_api.router, prefix="/static", tags=['static'])
 
 #1분에 한 번씩 ping을 보내서 sleep방지
-@app.get("/ping")
-async def ping():
-    return {"message": "pong"}
-
 async def keep_awake():
     while True:
         try:
             async with httpx.AsyncClient() as client:
-                await client.get(f"{URL}/ping")
+                await client.get(f"{URL}/staff/ping")
         except Exception as e:
             print("Keep-alive failed:", e)
         await asyncio.sleep(60) 
