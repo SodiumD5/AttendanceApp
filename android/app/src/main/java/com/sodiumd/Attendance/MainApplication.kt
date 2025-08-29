@@ -16,21 +16,8 @@ import com.facebook.soloader.SoLoader
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.Build
-
 class MainApplication : Application(), ReactApplication {
-  override fun registerReceiver(receiver: BroadcastReceiver?, filter: IntentFilter?): Intent? {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        super.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
-    } else {
-        super.registerReceiver(receiver, filter)
-    }
-  }
-  
+
   override val reactNativeHost: ReactNativeHost = ReactNativeHostWrapper(
         this,
         object : DefaultReactNativeHost(this) {

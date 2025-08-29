@@ -4,10 +4,7 @@
         "slug": "Attendance",
         "version": "1.0.0",
         "orientation": "portrait",
-        "icon": {
-            "foregroundImage": "./assets/calendar.png",
-            "resizeMode": "contain"
-        },
+        "icon": "./assets/user.png",
         "staffInterfaceStyle": "light",
         "newArchEnabled": true,
         "splash": {
