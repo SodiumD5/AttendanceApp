@@ -1,7 +1,7 @@
 {
     "expo": {
-        "name": "Attendance",
-        "slug": "Attendance",
+        "name": "출근부",
+        "slug": "attendance",
         "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./assets/calendarIcon.png",
