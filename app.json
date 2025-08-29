@@ -5,7 +5,6 @@
         "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./assets/user.png",
-        "staffInterfaceStyle": "light",
         "newArchEnabled": true,
         "splash": {
             "image": "./assets/calendar.png",
@@ -23,7 +22,6 @@
             "edgeToEdgeEnabled": true,
             "package": "com.sodiumd.Attendance",
             "permissions": ["POST_NOTIFICATIONS"],
-            "displayName": "출근부"
         },
         "web": {
             "favicon": "./assets/calendar.png"
