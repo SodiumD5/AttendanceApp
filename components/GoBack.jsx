@@ -1,11 +1,9 @@
-import { StyleSheet, View, Text, Pressable } from "react-native";
+import { StyleSheet, View, Pressable } from "react-native";
 import IconF from "react-native-vector-icons/Feather";
 
-const GoBack = ({ nav, pos }) => {
-    const topHeight = pos ? pos : 50;
-
+const GoBack = ({ nav, pos = 20 }) => {
     return (
-        <View style={{ ...styles.headerButton, top: topHeight }}>
+        <View style={{ ...styles.headerButton, top: pos }}>
             <Pressable onPress={() => nav.goBack()}>
                 <IconF name="chevron-left" size={50} />
             </Pressable>
@@ -18,7 +16,6 @@ export default GoBack;
 const styles = StyleSheet.create({
     headerButton: {
         position: "absolute",
-        top: 50,
         left: 5,
         flexDirection: "row",
     },

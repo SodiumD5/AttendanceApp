@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
 
     headerButton: {
         position: "absolute",
-        top: 50,
+        top: 20,
         right: 5,
         justifyContent: "flex-end",
     },

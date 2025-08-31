@@ -29,7 +29,7 @@ import RNFetchBlob from "rn-fetch-blob";
 import { PermissionsAndroid } from "react-native";
 
 const MonthlyAttendance = ({ navigation }) => {
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); //달 정도는 그냥 넘어가죠
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [selectedStaff, setSelectedStaff] = useState("직원 선택");
     const [stafflist, setStaffList] = useState([]);
@@ -436,9 +436,7 @@ const MonthlyAttendance = ({ navigation }) => {
             await PermissionsAndroid.requestMultiple([
                 PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
             ]).then((result) => {
-                if (
-                    result["android.permission.POST_NOTIFICATIONS"] === "granted"
-                ) {
+                if (result["android.permission.POST_NOTIFICATIONS"] === "granted") {
                     console.log("파일 접근 권한 허용");
                 } else {
                     console.log("권한 거절됨");

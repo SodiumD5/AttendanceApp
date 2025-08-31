@@ -1,13 +1,28 @@
 import { StyleSheet, View, Text, Pressable } from "react-native";
 import Colors from "./Colors";
+import { Lucide } from "@react-native-vector-icons/lucide";
+import IconF from "react-native-vector-icons/Feather";
 
 const BigButton = ({ context, onPress }) => {
+    const Icon = () => {
+        if (context == "월간 출근부") {
+            return <Lucide name="calendar" size={48} />;
+        } else if (context == "연차대장") {
+            return <IconF name="zoom-in" size={48} />;
+        } else if (context == "교직원 관리") {
+            return <IconF name="edit" size={48} />;
+        }
+    };
+
     return (
         <View style={styles.buttonContainer}>
             <View style={styles.ButtonShadow} />
 
             <Pressable onPress={onPress} style={styles.buttonWrapper}>
-                <Text style={styles.buttonText}>{context}</Text>
+                {Icon()}
+                <View style={styles.textContainer}>
+                    <Text style={styles.buttonText}>{context}</Text>
+                </View>
             </Pressable>
         </View>
     );
@@ -39,13 +54,20 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "100%",
         borderRadius: 10,
-        //내부정렬
-        justifyContent: "center", //세로
+
+        justifyContent: "flex-start",
+        paddingHorizontal: 30,
         alignItems: "center",
+        flexDirection: "row",
     },
 
     buttonText: {
         fontSize: 26,
         fontWeight: 600,
+    },
+
+    textContainer: {
+        flex: 1,
+        alignItems: "center",
     },
 });

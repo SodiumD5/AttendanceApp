@@ -19,7 +19,12 @@ const Manage = ({ navigation }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isDatePickerVisible, setDatePickerVisible] = useState(false);
     const [newStaffName, setNewStaffName] = useState("");
-    const [registerDay, setRegisterDay] = useState(new Date());
+    const [registerDay, setRegisterDay] = useState(() => {
+        const now = new Date();
+        const utcOffset = now.getTimezoneOffset() * 60000; //지역 시간과 utc시간의 차이를 구함
+        const utcTime = now.getTime() + utcOffset;
+        return new Date(utcTime + 9 * 60 * 60 * 1000);
+    });
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
     const [confirmMessage, setConfirmMessage] = useState("");
     const [refresh, setRefresh] = useState(0);
@@ -112,7 +117,12 @@ const Manage = ({ navigation }) => {
         toggleModal();
         toggleConfirm();
         setNewStaffName("");
-        setRegisterDay(new Date());
+        setRegisterDay(() => {
+            const now = new Date();
+            const utcOffset = now.getTimezoneOffset() * 60000; //지역 시간과 utc시간의 차이를 구함
+            const utcTime = now.getTime() + utcOffset;
+            return new Date(utcTime + 9 * 60 * 60 * 1000);
+        });
         setRefresh((prevRefresh) => prevRefresh + 1);
     };
 
@@ -158,9 +168,16 @@ const Manage = ({ navigation }) => {
                     <TouchableOpacity style={styles.dateInput} onPress={showDatePicker}>
                         <Text style={styles.dateText}>{formatDate(registerDay)}</Text>
                     </TouchableOpacity>
-        
-                    <RectangleButton message="추가하기" onPress={handleAddStaff} buttontype="modal"></RectangleButton>
-                    <RectangleButton message="취소" onPress={toggleModal} buttonColor="white" buttontype="modal"></RectangleButton>
+
+                    <RectangleButton
+                        message="추가하기"
+                        onPress={handleAddStaff}
+                        buttontype="modal"></RectangleButton>
+                    <RectangleButton
+                        message="취소"
+                        onPress={toggleModal}
+                        buttonColor="white"
+                        buttontype="modal"></RectangleButton>
                 </View>
             </Modal>
         );

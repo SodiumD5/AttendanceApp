@@ -7,7 +7,11 @@ router = APIRouter()
 @router.get('/datetime', status_code=200)
 def datetime():
     from datetime import datetime
-    now = datetime.now()
+    import pytz
+
+    #시간 한국으로 명시
+    seoul = pytz.timezone('Asia/Seoul')
+    now = datetime.now(seoul)
 
     response = {
         "current_datetime": now.isoformat(),

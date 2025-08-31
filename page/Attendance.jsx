@@ -71,7 +71,7 @@ const Attendance = ({ navigation, route }) => {
             const url = `${BaseUrl}/staff/state/?name=${employeeName}&year=${Datetime.year}&month=${Datetime.month}&day=${Datetime.day}`;
             const response = await fetch(url);
             const response_body = await response.json();
-            
+
             setWorkState(response_body["status"]);
             setUseHalf(response_body["ishalf"]);
         } catch (e) {
@@ -123,14 +123,20 @@ const Attendance = ({ navigation, route }) => {
                 <LongButton
                     context="퇴근하기"
                     bgColor={Colors.primary_green}
-                    onPress={() => changeWorkState({ changedStatus: "home" })}
+                    onPress={() => {
+                        changeWorkState({ changedStatus: "home" });
+                        navigation.GoBack();
+                    }}
                 />
             );
         } else if (workState === "not_work") {
             return (
                 <LongButton
                     context="출근하기"
-                    onPress={() => changeWorkState({ changedStatus: "work" })}
+                    onPress={() => {
+                        changeWorkState({ changedStatus: "work" });
+                        navigation.GoBack();
+                    }}
                 />
             );
         } else {
@@ -176,7 +182,12 @@ const Attendance = ({ navigation, route }) => {
                     </Text>
                 </Pressable>
                 <Text style={styles.divider}>|</Text>
-                <Pressable style={styles.button} onPress={() => useRest({ category: "full" })}>
+                <Pressable
+                    style={styles.button}
+                    onPress={() => {
+                        useRest({ category: "full" });
+                        navigation.GoBack();
+                    }}>
                     <Text
                         style={[
                             styles.buttonText,

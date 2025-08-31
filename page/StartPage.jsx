@@ -1,8 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image } from "react-native";
 
-import { useNavigation } from "@react-navigation/native";
-
 import Colors from "../components/Colors";
 import LongButton from "../components/LongButton";
 
