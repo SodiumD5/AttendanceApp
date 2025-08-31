@@ -125,7 +125,7 @@ const Attendance = ({ navigation, route }) => {
                     bgColor={Colors.primary_green}
                     onPress={() => {
                         changeWorkState({ changedStatus: "home" });
-                        navigation.GoBack();
+                        navigation.goBack();
                     }}
                 />
             );
@@ -135,7 +135,7 @@ const Attendance = ({ navigation, route }) => {
                     context="출근하기"
                     onPress={() => {
                         changeWorkState({ changedStatus: "work" });
-                        navigation.GoBack();
+                        navigation.goBack();
                     }}
                 />
             );
@@ -186,7 +186,7 @@ const Attendance = ({ navigation, route }) => {
                     style={styles.button}
                     onPress={() => {
                         useRest({ category: "full" });
-                        navigation.GoBack();
+                        navigation.goBack();
                     }}>
                     <Text
                         style={[

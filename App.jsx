@@ -19,7 +19,7 @@ export default function App() {
     return (
         <>
             <StatusBar barStyle="dark-content"></StatusBar>
-            <SafeAreaView style={{ flex: 1, paddingTop: StatusBar.currentHeight }}>
+            <SafeAreaView style={{ flex: 1 }}>
                 <NavigationContainer>
                     <Stack.Navigator
                         initialRouteName="StartPage"
