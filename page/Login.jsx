@@ -70,12 +70,12 @@ const Login = ({ navigation }) => {
         const showSubscription = Keyboard.addListener("keyboardDidShow", (e) => {
             setIsKeyboardVisible(true);
             Animated.timing(keyboardHeight, {
-                toValue: -e.endCoordinates.height + 100,
+                toValue: -e.endCoordinates.height + e.endCoordinates.height/6,
                 duration: 250,
                 useNativeDriver: false,
             }).start();
             Animated.timing(buttonBottom, {
-                toValue: e.endCoordinates.height - 200,
+                toValue: e.endCoordinates.height - 2*e.endCoordinates.height/3,
                 duration: 250,
                 useNativeDriver: false,
             }).start();

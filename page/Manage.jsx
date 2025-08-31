@@ -19,12 +19,7 @@ const Manage = ({ navigation }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isDatePickerVisible, setDatePickerVisible] = useState(false);
     const [newStaffName, setNewStaffName] = useState("");
-    const [registerDay, setRegisterDay] = useState(() => {
-        const now = new Date();
-        const utcOffset = now.getTimezoneOffset() * 60000; //지역 시간과 utc시간의 차이를 구함
-        const utcTime = now.getTime() + utcOffset;
-        return new Date(utcTime + 9 * 60 * 60 * 1000);
-    });
+    const [registerDay, setRegisterDay] = useState(new Date());
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
     const [confirmMessage, setConfirmMessage] = useState("");
     const [refresh, setRefresh] = useState(0);
@@ -117,12 +112,7 @@ const Manage = ({ navigation }) => {
         toggleModal();
         toggleConfirm();
         setNewStaffName("");
-        setRegisterDay(() => {
-            const now = new Date();
-            const utcOffset = now.getTimezoneOffset() * 60000; //지역 시간과 utc시간의 차이를 구함
-            const utcTime = now.getTime() + utcOffset;
-            return new Date(utcTime + 9 * 60 * 60 * 1000);
-        });
+        setRegisterDay(new Date());
         setRefresh((prevRefresh) => prevRefresh + 1);
     };
 
