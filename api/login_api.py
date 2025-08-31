@@ -26,8 +26,8 @@ class Packet(BaseModel):
 @router.post('/info', status_code=200)
 def info(packet:Packet):
     import bcrypt
-    id = packet.id
-    pw = packet.pw
+    id = (packet.id).strip()
+    pw = (packet.pw).strip()
     
     get_hash = login_db.get_hash()
     

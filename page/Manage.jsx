@@ -102,7 +102,10 @@ const Manage = ({ navigation }) => {
             return;
         }
 
-        var enterDay = registerDay.toISOString().split("T")[0];
+        const year = registerDay.getFullYear();
+        const month = (registerDay.getMonth() + 1).toString().padStart(2, "0");
+        const day = registerDay.getDate().toString().padStart(2, "0");
+        var enterDay = `${year}-${month}-${day}`;
 
         const postData = { staff_name: newStaffName, enroll_date: enterDay };
         const url = "/manager/enrollment";
