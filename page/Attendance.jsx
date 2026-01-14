@@ -4,9 +4,39 @@ import Colors from "../components/Colors";
 
 import LongButton from "../components/LongButton";
 import GoBack from "../components/GoBack";
-import useUrlStore from "../store/urlStore";
+import { supabase } from "../lib/supabase";
 
-const BaseUrl = useUrlStore.getState().BaseUrl;
+class getDate {
+    constructor() {
+        let today = new Date();
+        this.year = today.getFullYear();
+        this.month = today.getMonth() + 1;
+        this.date = today.getDate();
+        this.hour = today.getHours();
+        this.minute = today.getMinutes();
+        this.second = today.getSeconds();
+
+        this.day = today.getDay();
+        this.dayToKo();
+        this.dayToStr();
+
+        this.time = new Date().toLocaleTimeString({
+            hour12: false,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+        });
+    }
+
+    dayToKo() {
+        const ko = ["일", "월", "화", "수", "목", "금", "토"];
+        this.dayKo = ko[this.day];
+    }
+
+    dayToStr() {
+        this.dateStr = `${this.year}-${String(this.month).padStart(2, "0")}-${String(this.date).padStart(2, "0")}`;
+    }
+}
 
 const Attendance = ({ navigation, route }) => {
     const { employeeName } = route.params;
@@ -16,27 +46,52 @@ const Attendance = ({ navigation, route }) => {
     const [usehalf, setUseHalf] = useState(false);
     const [usefull, setUseFull] = useState(false);
 
-    const changeWorkState = async ({ changedStatus }) => {
-        //버튼 눌렀을 때 출근, 퇴근 바꿔줌
-        setWorkState(changedStatus);
-
-        const now_time = `${datetime.hour}:${datetime.minute}`;
-        const postData = {
-            name: employeeName,
-            year: datetime.year,
-            month: datetime.month,
-            day: datetime.day,
-            time: now_time,
-            status: changedStatus,
-        };
-
-        await fetch(`${BaseUrl}/staff/changing-state`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(postData),
+    const fetchWorkState = async (date) => {
+        //화면 로딩 했을 때 기존 상태 데이터 가져오기
+        const { data, error } = await supabase.rpc("get_employee_status_and_category", {
+            p_name: employeeName,
         });
+
+        if (error) {
+            console.error("get_employee_status_and_category error : ", error);
+            return;
+        }
+
+        const employeeData = data[0];
+        setWorkState(employeeData?.employee_status ?? "not_work");
+        if (employeeData.rest_category != null) {
+            //restdata가 있을 경우 또 못 쓰게 막음.
+            setUseHalf(true);
+            setUseFull(true);
+        }
+    };
+
+    useEffect(() => {
+        //처음 시작할 때와 시간 업데이트
+        const date = new getDate();
+        setDatetime(date);
+        fetchWorkState(date);
+
+        const intervalId = setInterval(() => {
+            const date = new getDate();
+            setDatetime(date);
+        }, 1000);
+
+        return () => clearInterval(intervalId);
+    }, []);
+
+    const changeWorkState = async ({ changeTo }) => {
+        //출근, 퇴근 버튼 눌렀을 때
+        setWorkState(changeTo);
+
+        const { error } = await supabase.rpc("record_today_attendance", {
+            p_name: employeeName,
+            p_status: changeTo,
+        });
+
+        if (error) {
+            console.error("Attendance update error:", error);
+        }
     };
 
     const useRest = async ({ category }) => {
@@ -45,70 +100,20 @@ const Attendance = ({ navigation, route }) => {
         setUseFull(true);
         if (category == "full") {
             setWorkState("full");
-        } else {
-            setUseHalf(true);
         }
 
-        const now_time = `${datetime.hour}:${datetime.minute}`;
-        const postData = {
-            name: employeeName,
-            date: datetime.date,
-            time: category == "half" ? now_time : null,
-            category: category,
-        };
-        await fetch(`${BaseUrl}/staff/using-rest`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(postData),
+        const { error } = await supabase.rpc("record_today_rest", {
+            p_name: employeeName,
+            p_category: category,
         });
-    };
 
-    const fetchWorkState = async (Datetime) => {
-        //페이지 첫 로딩할 때, 상태 반영
-        try {
-            const url = `${BaseUrl}/staff/state/?name=${employeeName}&year=${Datetime.year}&month=${Datetime.month}&day=${Datetime.day}`;
-            const response = await fetch(url);
-            const response_body = await response.json();
-
-            setWorkState(response_body["status"]);
-            setUseHalf(response_body["ishalf"]);
-        } catch (e) {
-            console.error("Failed to fetch work state:", e);
-        }
-    };
-
-    const fetchDatetime = async () => {
-        try {
-            const response = await fetch(`${BaseUrl}/staff/datetime`);
-            const data = await response.json();
-            setDatetime(data);
-
-            return data;
-        } catch (e) {
-            console.error("Failed to fetch datetime:", e);
-            return null;
+        if (error) {
+            console.error("Rest update error:", error);
         }
     };
 
     useEffect(() => {
-        const updateDatetime = async () => {
-            const data = await fetchDatetime();
-            if (data) {
-                await fetchWorkState(data);
-            }
-        };
-        updateDatetime();
-
-        const intervalId = setInterval(() => {
-            updateDatetime();
-        }, 1000 * 10);
-
-        return () => clearInterval(intervalId);
-    }, []);
-
-    useEffect(() => {
+        // 다른 어떤 버튼을 클릭시 연차 사용 불가
         if (workState == "not_work") {
             setUseFull(false);
         } else {
@@ -118,35 +123,29 @@ const Attendance = ({ navigation, route }) => {
 
     const commute_button = () => {
         //not_work, work, home, full
-        if (workState === "work") {
+        if (workState === "not_work") {
+            return (
+                <LongButton
+                    context="출근하기"
+                    onPress={() => {
+                        changeWorkState({ changeTo: "work" });
+                        // navigation.goBack();
+                    }}
+                />
+            );
+        } else if (workState === "work") {
             return (
                 <LongButton
                     context="퇴근하기"
                     bgColor={Colors.primary_green}
                     onPress={() => {
-                        changeWorkState({ changedStatus: "home" });
-                        navigation.goBack();
-                    }}
-                />
-            );
-        } else if (workState === "not_work") {
-            return (
-                <LongButton
-                    context="출근하기"
-                    onPress={() => {
-                        changeWorkState({ changedStatus: "work" });
-                        navigation.goBack();
+                        changeWorkState({ changeTo: "home" });
+                        // navigation.goBack();
                     }}
                 />
             );
         } else {
-            return (
-                <LongButton
-                    context="퇴근완료"
-                    bgColor={Colors.inactive_bg}
-                    textColor={Colors.inactive_text}
-                />
-            );
+            return <LongButton context="퇴근완료" bgColor={Colors.inactive_bg} textColor={Colors.inactive_text} />;
         }
     };
 
@@ -155,7 +154,7 @@ const Attendance = ({ navigation, route }) => {
             <GoBack nav={navigation}></GoBack>
 
             <Text style={styles.title}>
-                {datetime.month}월 {datetime.day}일
+                {datetime.month}월 {datetime.date}일 <Text style={{ fontSize: 30 }}>({datetime.dayKo})</Text>
             </Text>
             <Text style={styles.subTitle}>
                 {datetime.hour}시 {datetime.minute}분
@@ -177,7 +176,8 @@ const Attendance = ({ navigation, route }) => {
                             {
                                 color: usehalf ? Colors.primary_gray : Colors.text_gray,
                             },
-                        ]}>
+                        ]}
+                    >
                         반차 사용
                     </Text>
                 </Pressable>
@@ -186,15 +186,17 @@ const Attendance = ({ navigation, route }) => {
                     style={styles.button}
                     onPress={() => {
                         useRest({ category: "full" });
-                        navigation.goBack();
-                    }}>
+                        // navigation.goBack();
+                    }}
+                >
                     <Text
                         style={[
                             styles.buttonText,
                             {
                                 color: usefull ? Colors.primary_gray : Colors.text_gray,
                             },
-                        ]}>
+                        ]}
+                    >
                         연차 사용
                     </Text>
                 </Pressable>

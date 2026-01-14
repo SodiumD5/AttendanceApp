@@ -6,7 +6,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import StartPage from "./page/StartPage";
 import AttendanceList from "./page/AttendanceList";
 import Attendance from "./page/Attendance";
-import Login from "./page/Login";
 import AdminMenu from "./page/AdminMenu";
 import MonthlyAttendance from "./page/MonthlyAttendance";
 import AnnualLedger from "./page/AnnualLedger";
@@ -21,13 +20,10 @@ export default function App() {
             <StatusBar barStyle="dark-content"></StatusBar>
             <SafeAreaView style={{ flex: 1 }}>
                 <NavigationContainer>
-                    <Stack.Navigator
-                        initialRouteName="StartPage"
-                        screenOptions={{ headerShown: false }}>
+                    <Stack.Navigator initialRouteName="StartPage" screenOptions={{ headerShown: false }}>
                         <Stack.Screen name="StartPage" component={StartPage} />
                         <Stack.Screen name="AttendanceList" component={AttendanceList} />
                         <Stack.Screen name="Attendance" component={Attendance} />
-                        <Stack.Screen name="Login" component={Login} />
                         <Stack.Screen name="AdminMenu" component={AdminMenu} />
 
                         <Stack.Screen name="MonthlyAttendance" component={MonthlyAttendance} />

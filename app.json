@@ -21,7 +21,7 @@
             },
             "edgeToEdgeEnabled": true,
             "package": "com.sodiumd.Attendance",
-            "permissions": ["POST_NOTIFICATIONS"],
+            "permissions": ["POST_NOTIFICATIONS"]
         },
         "web": {
             "favicon": "./assets/calendarIcon.png"
@@ -30,6 +30,7 @@
             "eas": {
                 "projectId": "7e535b21-1f2b-4bb5-b29a-2c9d95768bc8"
             }
-        }
+        },
+        "plugins": ["@react-native-google-signin/google-signin"]
     }
 }

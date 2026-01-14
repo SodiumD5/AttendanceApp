@@ -5,21 +5,22 @@ import IconM from "react-native-vector-icons/MaterialCommunityIcons";
 import Colors from "../components/Colors";
 import RoundButton from "../components/RoundButton";
 import GoBack from "../components/GoBack";
-import useUrlStore from "../store/urlStore";
-
-const BaseUrl = useUrlStore.getState().BaseUrl;
+import { supabase } from "../lib/supabase";
 
 const AttendanceList = ({ navigation }) => {
-    const [staffInfo, setStaffInfo] = useState();
+    const [staffInfo, setStaffInfo] = useState([]);
 
     useEffect(() => {
         const getStaffList = async () => {
             try {
-                const response = await fetch(`${BaseUrl}/staff/active`);
-                const info = await response.json();
-                setStaffInfo(info);
+                const { data, error } = await supabase.rpc("get_active_employee_list");
+
+                if (error) {
+                    throw error;
+                }
+                setStaffInfo(data || []);
             } catch (e) {
-                console.log("failed to get staff list : ", e);
+                console.log("failed to get employee list : ", e);
             }
         };
 
@@ -30,11 +31,7 @@ const AttendanceList = ({ navigation }) => {
         <View style={styles.container}>
             <GoBack nav={navigation}></GoBack>
             <View style={styles.headerButton}>
-                <IconM
-                    name="account-circle-outline"
-                    size={50}
-                    onPress={() => navigation.push("Login")}
-                />
+                <IconM name="account-circle-outline" size={50} onPress={() => navigation.push("Login")} />
             </View>
             <Text style={styles.title}>출근 체크</Text>
             <FlatList
@@ -47,6 +44,7 @@ const AttendanceList = ({ navigation }) => {
                         onPress={() =>
                             navigation.push("Attendance", {
                                 employeeName: item.name,
+                                employeeId: item.id,
                             })
                         }
                     />

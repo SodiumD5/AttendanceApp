@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Image } from "react-native";
 
 import Colors from "../components/Colors";
 import LongButton from "../components/LongButton";
+import Auth from "../components/Auth";
 
 const StartPage = ({ navigation }) => {
     return (
@@ -11,12 +12,7 @@ const StartPage = ({ navigation }) => {
                 <Image source={require("../assets/calendar.png")} style={styles.logo} />
             </View>
             <LongButton context="출근하기" onPress={() => navigation.push("AttendanceList")} />
-            <LongButton
-                context="관리자로 로그인"
-                bgColor={Colors.primary_white}
-                textColor={Colors.text_gray}
-                onPress={() => navigation.push("Login")}
-            />
+            <Auth />
             <StatusBar style="auto" />
         </View>
     );
