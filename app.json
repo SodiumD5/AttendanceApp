@@ -21,6 +21,7 @@
             },
             "edgeToEdgeEnabled": true,
             "package": "com.sodiumd.Attendance",
+            "googleServicesFile": "./google-services.json",
             "permissions": ["POST_NOTIFICATIONS"]
         },
         "web": {
@@ -31,6 +32,6 @@
                 "projectId": "7e535b21-1f2b-4bb5-b29a-2c9d95768bc8"
             }
         },
-        "plugins": ["@react-native-google-signin/google-signin"]
+        "plugins": ["@react-native-google-signin/google-signin", "@react-native-community/datetimepicker"]
     }
 }

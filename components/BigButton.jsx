@@ -1,16 +1,16 @@
 import { StyleSheet, View, Text, Pressable } from "react-native";
 import Colors from "./Colors";
 import { Lucide } from "@react-native-vector-icons/lucide";
-import IconF from "react-native-vector-icons/Feather";
+import { Feather } from "@react-native-vector-icons/feather";
 
 const BigButton = ({ context, onPress }) => {
     const Icon = () => {
         if (context == "월간 출근부") {
             return <Lucide name="calendar" size={48} />;
         } else if (context == "연차대장") {
-            return <IconF name="zoom-in" size={48} />;
+            return <Feather name="zoom-in" size={48} />;
         } else if (context == "교직원 관리") {
-            return <IconF name="edit" size={48} />;
+            return <Feather name="edit" size={48} />;
         }
     };
 

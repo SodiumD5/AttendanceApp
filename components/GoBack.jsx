@@ -1,11 +1,12 @@
 import { StyleSheet, View, Pressable } from "react-native";
-import IconF from "react-native-vector-icons/Feather";
+import { Feather } from "@react-native-vector-icons/feather";
+
 
 const GoBack = ({ nav, pos = 20 }) => {
     return (
         <View style={{ ...styles.headerButton, top: pos }}>
             <Pressable onPress={() => nav.goBack()}>
-                <IconF name="chevron-left" size={50} />
+                <Feather name="chevron-left" size={50} />
             </Pressable>
         </View>
     );

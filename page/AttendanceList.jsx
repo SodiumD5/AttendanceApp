@@ -1,7 +1,7 @@
 import { StyleSheet, View, Text, FlatList } from "react-native";
 import { useState, useEffect } from "react";
 
-import IconM from "react-native-vector-icons/MaterialCommunityIcons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Colors from "../components/Colors";
 import RoundButton from "../components/RoundButton";
 import GoBack from "../components/GoBack";
@@ -31,7 +31,11 @@ const AttendanceList = ({ navigation }) => {
         <View style={styles.container}>
             <GoBack nav={navigation}></GoBack>
             <View style={styles.headerButton}>
-                <IconM name="account-circle-outline" size={50} onPress={() => navigation.push("Login")} />
+                <MaterialCommunityIcons
+                    name="account-circle-outline"
+                    size={50}
+                    onPress={() => navigation.push("Login")}
+                />
             </View>
             <Text style={styles.title}>출근 체크</Text>
             <FlatList

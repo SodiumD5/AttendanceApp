@@ -3,13 +3,8 @@ import { StyleSheet, View, Text, Pressable, FlatList, TextInput } from "react-na
 
 import Colors from "../components/Colors";
 import AdminHeader from "../layout/AdminHeader";
-import useTokenStore from "../store/tokenStore";
-import AlertModal from "../components/AlertModal";
-import axiosInstance from "../api/axios";
 import PickerModal from "../components/PickerModal";
-import useUrlStore from "../store/urlStore";
-
-const BaseUrl = useUrlStore.getState().BaseUrl;
+import { supabase } from "../lib/supabase";
 
 const AnnualLedger = ({ navigation }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -24,59 +19,36 @@ const AnnualLedger = ({ navigation }) => {
 
     const years = Array.from({ length: 76 }, (_, i) => 2025 + i);
 
-    //토큰 만료될 시 로그인 화면으로 튕김
-    const [sessionExpiration, setSessionExpiration] = useState(false);
-    const { token } = useTokenStore();
     useEffect(() => {
-        if (!token) {
-            setSessionExpiration(true);
-        }
-    }, [token]);
-    const viewSessionExpiration = () => {
-        return (
-            <AlertModal
-                isVisible={sessionExpiration}
-                setIsVisible={setSessionExpiration}
-                title={"세션이 만료되어 로그아웃 됩니다."}
-                bgColor={Colors.primary_red}
-                onClose={() => {
-                    navigation.reset({
-                        index: 1,
-                        routes: [{ name: "StartPage" }, { name: "Login" }],
-                    });
-                }}
-            />
-        );
-    };
-
-    useEffect(() => {
-        const getStaffData = async () => {
-            const response = await fetch(`${BaseUrl}/staff/active`);
-            const staff = await response.json();
-            setStaffList(staff);
+        const getStaffList = async () => {
+            try {
+                const { data, error } = await supabase.rpc("get_active_employee_list");
+                if (error) throw error;
+                setStaffList(data);
+            } catch (e) {
+                console.log("failed to get employee list : ", e);
+            }
         };
-
-        getStaffData();
+        getStaffList();
     }, []);
 
     const handleSearch = async () => {
         //연차 내역 가져오기
-        var url = `/manager/rest/${selectedStaff}/${selectedYear}`;
-        const rest_records = await axiosInstance.get(url);
-        const response_data = rest_records.data;
+        const { data: restData, error } = await supabase.rpc("get_employee_rest", {
+            p_name: selectedStaff,
+            p_year: selectedYear,
+        });
 
-        setRestData(response_data["info"]);
-        setRestCount(response_data["count"]);
+        if (error) {
+            console.log(error.message);
+            return;
+        }
 
-        //총 연차 일수 가져오기 (없으면 생성)
-        var url = "/manager/rest/limit";
-        const postData = {
-            name: selectedStaff,
-            year: selectedYear,
-        };
-        const rest_limit = await axiosInstance.post(url, postData);
+        setRestData(restData.rest_details);
+        setRestCount(restData.total_rest);
+        setTotalRestCount(restData.annual_limit);
+
         setTotalRestEdit(true);
-        setTotalRestCount(rest_limit.data);
     };
 
     const renderHeader = () => (
@@ -93,7 +65,7 @@ const AnnualLedger = ({ navigation }) => {
             <View style={styles.tableRow}>
                 <Text style={styles.rowText}>{item.count}</Text>
                 <Text style={styles.rowText}>{item.date}</Text>
-                <Text style={styles.rowText}>{item.time}</Text>
+                <Text style={styles.rowText}>{!item.time ? "연차" : item.time}</Text>
             </View>
         );
     };
@@ -101,13 +73,14 @@ const AnnualLedger = ({ navigation }) => {
     //전체 휴가 횟수 바꾸기
     const onChangeLimit = async (text) => {
         setTotalRestCount(text);
-        const url = "/manager/modification/rest";
-        const data = {
-            name: selectedStaff,
-            year: selectedYear,
-            limit: parseInt(text),
-        };
-        await axiosInstance.put(url, data);
+
+        const { error } = await supabase.rpc("update_employee_rest_limit", {
+            p_name: selectedStaff,
+            p_year: selectedYear,
+            p_limit: parseInt(text),
+        });
+
+        if (error) console.log(error.message);
     };
 
     // 연도 선택 모달
@@ -142,18 +115,14 @@ const AnnualLedger = ({ navigation }) => {
             <View style={styles.headerContainer}>
                 <View style={styles.serachContainer}>
                     <View style={styles.pickerWrapper}>
-                        <Pressable
-                            style={styles.pickerButton}
-                            onPress={() => setShowYearPicker(true)}>
+                        <Pressable style={styles.pickerButton} onPress={() => setShowYearPicker(true)}>
                             <Text style={styles.pickerText}>{selectedYear}</Text>
                             <Text style={styles.arrowIcon}>▼</Text>
                         </Pressable>
                         <Text style={styles.pickerLabel}> 년</Text>
                     </View>
                     <View style={styles.pickerWrapper}>
-                        <Pressable
-                            style={styles.pickerButton}
-                            onPress={() => setShowStaffPicker(true)}>
+                        <Pressable style={styles.pickerButton} onPress={() => setShowStaffPicker(true)}>
                             <Text style={styles.pickerText}>{selectedStaff}</Text>
                             <Text style={styles.arrowIcon}>▼</Text>
                         </Pressable>
@@ -193,15 +162,12 @@ const AnnualLedger = ({ navigation }) => {
                 keyExtractor={(item) => item.id}
                 ListHeaderComponent={renderHeader}
                 renderItem={renderItem}
-                ListEmptyComponent={() => (
-                    <Text style={styles.emptyText}>검색 결과가 없습니다.</Text>
-                )}
+                ListEmptyComponent={() => <Text style={styles.emptyText}>검색 결과가 없습니다.</Text>}
                 style={styles.listContainer}
             />
 
             {renderYearPicker()}
             {renderStaffPicker()}
-            {viewSessionExpiration()}
         </View>
     );
 };
