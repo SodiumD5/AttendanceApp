@@ -1,27 +1,20 @@
 import { useEffect, useState } from "react";
-import {
-    StyleSheet,
-    View,
-    Text,
-    Pressable,
-    FlatList,
-    TouchableOpacity,
-    Linking,
-    Platform,
-    PermissionsAndroid,
-} from "react-native";
+import { StyleSheet, View, Text, Pressable, FlatList, TouchableOpacity, Alert } from "react-native";
 import Modal from "react-native-modal";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import RNFetchBlob from "rn-fetch-blob";
+import { WebView } from "react-native-webview";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Print from "expo-print";
+import { shareAsync } from "expo-sharing";
 
 import Colors from "../components/Colors";
 import AdminHeader from "../layout/AdminHeader";
 import AlertModal from "../components/AlertModal";
-import axiosInstance from "../api/axios";
 import RectangleButton from "../components/RectangleButton";
 import PickerModal from "../components/PickerModal";
 import BottomDownload from "../components/BottomDownload";
 import { supabase } from "../lib/supabase";
+import MakeHtml from "../components/MakeHtml";
 
 const MonthlyAttendance = ({ navigation }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -39,6 +32,8 @@ const MonthlyAttendance = ({ navigation }) => {
     const [selectedWorkTime, setSelectedWorkTime] = useState();
     const [selectedLeaveTime, setSelectedLeaveTime] = useState();
     const [selectedRest, setSelectedRest] = useState();
+
+    const [generatedHtml, setGeneratedHtml] = useState("");
 
     const years = Array.from({ length: 76 }, (_, i) => 2025 + i);
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -162,26 +157,28 @@ const MonthlyAttendance = ({ navigation }) => {
     };
 
     const openWebview = async () => {
-        const response = await axiosInstance.get(`/static/attendance/${selectedYear}/${selectedMonth}/web`);
-        Linking.openURL(response.data.url);
+        const attendanceHtml = await MakeHtml({ selectedYear, selectedMonth, mode: "web" });
+        setGeneratedHtml(attendanceHtml);
+        setActiveModal("webview");
     };
 
     const downloadPdf = async () => {
-        if (Platform.OS === "android") {
-            await PermissionsAndroid.requestMultiple([PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS]);
-        }
-        const response = await axiosInstance.get(`/static/attendance/${selectedYear}/${selectedMonth}/pdf`);
-        const fileName = `${selectedYear}년 ${selectedMonth}월 출근부.pdf`;
+        const attendanceHtml = await MakeHtml({ selectedYear, selectedMonth, mode: "pdf" });
 
-        RNFetchBlob.config({
-            addAndroidDownloads: {
-                useDownloadManager: true,
-                notification: true,
-                title: fileName,
-                mime: "application/pdf",
-                mediaScannable: true,
-            },
-        }).fetch("GET", response.data.url);
+        const { uri } = await Print.printToFileAsync({ html: attendanceHtml });
+
+        const fileName = `${selectedYear}년 ${selectedMonth}월 출근부.pdf`;
+        const newUri = FileSystem.cacheDirectory + fileName;
+
+        await FileSystem.moveAsync({
+            from: uri,
+            to: newUri,
+        });
+
+        await shareAsync(newUri, {
+            UTI: ".pdf",
+            mimeType: "application/pdf",
+        });
     };
 
     const isLeave = selectedRest === "연차";
@@ -318,6 +315,28 @@ const MonthlyAttendance = ({ navigation }) => {
                         buttontype="modal"
                     />
                 </View>
+            </Modal>
+
+            {/* 웹뷰 모달 추가 */}
+            <Modal
+                isVisible={activeModal === "webview"}
+                onBackdropPress={() => setActiveModal(null)}
+                style={{ margin: 0 }} // 전체 화면으로 띄우기 위함
+            >
+                <View
+                    style={{
+                        height: 50,
+                        justifyContent: "center",
+                        paddingHorizontal: 15,
+                        borderBottomWidth: 1,
+                        borderColor: "#eee",
+                    }}
+                >
+                    <TouchableOpacity onPress={() => setActiveModal(null)}>
+                        <Text style={{ color: "red", fontSize: 16 }}>닫기</Text>
+                    </TouchableOpacity>
+                </View>
+                <WebView source={{ html: generatedHtml }} />
             </Modal>
 
             {/* Picker 및 Alert 모달들 */}

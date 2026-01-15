@@ -2,5 +2,4 @@
   <string name="app_name">출근부</string>
   <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
   <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
-  <string name="server_client_id">533008965338-24c0rro2tjv3ub04kekchoesr98ovm5i.apps.googleusercontent.com</string>
 </resources>
