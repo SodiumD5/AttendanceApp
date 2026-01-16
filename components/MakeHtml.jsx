@@ -46,7 +46,9 @@ const MakeHtml = async ({ selectedYear, selectedMonth, mode }) => {
                 } else if (dayData.status === "반차") {
                     cellContent = `반차<br/>${dayData.work || ""}<br/>${dayData.leave || ""}`;
                 } else if (dayData.status === "출근") {
-                    cellContent = `출근<br/>${dayData.work || ""}<br/>${dayData.leave || ""}`;
+                    cellContent = `출근<br/><span class="time-text">${
+                        dayData.work || ""
+                    }</span><br/><span class="time-text">${dayData.leave || ""}</span>`;
                 }
             }
 

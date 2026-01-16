@@ -30,13 +30,6 @@ const AttendanceList = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <GoBack nav={navigation}></GoBack>
-            <View style={styles.headerButton}>
-                <MaterialCommunityIcons
-                    name="account-circle-outline"
-                    size={50}
-                    onPress={() => navigation.push("Login")}
-                />
-            </View>
             <Text style={styles.title}>출근 체크</Text>
             <FlatList
                 data={staffInfo}

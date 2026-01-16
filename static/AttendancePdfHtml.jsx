@@ -4,67 +4,64 @@ export const attendancePdfHtml = `
 <head>
     <meta charset="utf-8">
     <style>
-        /* 가로 모드 설정을 위한 핵심 */
         @page {
             size: A4 landscape;
-            margin: 10mm;
+            margin: 5mm;
         }
 
         html, body {
             width: 100%;
-            height: 100%;
             margin: 0;
             padding: 0;
             background: #fff;
-            font-family: sans-serif;
-        }
-
-        body {
-            box-sizing: border-box;
+            font-family: 'sans-serif';
+            -webkit-print-color-adjust: exact; 
         }
 
         .header-title {
-            font-size: 24px;
+            font-size: 20px; 
             font-weight: bold;
             text-align: center;
-            margin-bottom: 20px;
-            width: 100%;
+            margin-bottom: 10px;
         }
 
         table {
-            width: 100%; /* 고정 mm 대신 100% 사용 */
+            width: 100%;
             border-collapse: collapse;
-            border: 2px solid #000;
             table-layout: fixed;
+            border: 1px solid #000;
         }
 
         th, td {
             border: 1px solid #000;
-            padding: 4px 2px;
+            padding: 2px 1px;
             text-align: center;
-            font-size: 8px; /* 가로로 길어지므로 폰트 크기 조절 */
-            height: 40px;
+            font-size: 6px; 
+            height: 35px;
+            overflow: hidden;
+            white-space: nowrap;
             word-break: break-all;
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color: #f2f2f2 !important;
         }
 
-        .sticky-col {
-            width: 60px; /* 이름 칸 너비 최적화 */
-            font-weight: bold;
-            border-right: 2px solid #000;
+        .sticky-col { width: 45px; font-weight: bold; }
+        .total-col { width: 25px; font-weight: bold; background-color: #fafafa !important; }
+        
+        th:not(.sticky-col):not(.total-col), 
+        td:not(.sticky-col):not(.total-col) {
+            width: auto;
         }
 
-        .total-col {
-            width: 35px;
-            background-color: #fafafa;
-            font-weight: bold;
-        }
+        .saturday { background-color: #eef7ff !important; }
+        .sunday { background-color: #fff0f0 !important; }
 
-        .saturday { background-color: #eef7ff; }
-        .sunday { background-color: #fff0f0; }
+        .time-text {
+            font-size: 5px;
+            line-height: 1;
+        }
     </style>
 </head>
 <body>

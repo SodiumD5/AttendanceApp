@@ -55,7 +55,7 @@ const AnnualLedger = ({ navigation }) => {
         <View style={styles.tableHeader}>
             <Text style={styles.headerText}>사용횟수</Text>
             <Text style={styles.headerText}>날짜</Text>
-            <Text style={styles.headerText}>사용 시각</Text>
+            <Text style={styles.headerText}>구분</Text>
         </View>
     );
 
@@ -65,19 +65,23 @@ const AnnualLedger = ({ navigation }) => {
             <View style={styles.tableRow}>
                 <Text style={styles.rowText}>{item.count}</Text>
                 <Text style={styles.rowText}>{item.date}</Text>
-                <Text style={styles.rowText}>{!item.time ? "연차" : item.time}</Text>
+                <Text style={styles.rowText}>{item.category === "full" ? "연차" : "반차"}</Text>
             </View>
         );
     };
 
     //전체 휴가 횟수 바꾸기
-    const onChangeLimit = async (text) => {
-        setTotalRestCount(text);
+    const onChangeLimit = async (limitText) => {
+        if (!limitText) {
+            setTotalRestCount("");
+            return;
+        }
+        setTotalRestCount(Number(limitText));
 
         const { error } = await supabase.rpc("update_employee_rest_limit", {
             p_name: selectedStaff,
             p_year: selectedYear,
-            p_limit: parseInt(text),
+            p_limit: totalRestCount,
         });
 
         if (error) console.log(error.message);
@@ -95,6 +99,7 @@ const AnnualLedger = ({ navigation }) => {
             renderText={(item) => item.toString()}
         />
     );
+
     // 직원 선택 모달
     const renderStaffPicker = () => (
         <PickerModal
@@ -137,8 +142,8 @@ const AnnualLedger = ({ navigation }) => {
                         <Text style={styles.summaryLabel}>총 연차 일수</Text>
                         <View style={{ flexDirection: "row" }}>
                             <TextInput
-                                style={styles.summaryValue}
                                 keyboardType="numeric"
+                                style={styles.summaryValue}
                                 onChangeText={onChangeLimit}
                                 value={`${totalRestCount}`}
                                 editable={totalRestEdit}
@@ -269,7 +274,7 @@ const styles = StyleSheet.create({
     rowText: {
         flex: 1,
         textAlign: "center",
-        fontSize: 16,
+        fontSize: 13,
         color: Colors.text_gray,
     },
     emptyText: {
@@ -306,6 +311,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: Colors.text_gray,
         padding: 0,
+        paddingLeft: 1, //상하좌우 조금이라도 패딩이 있으면 된다고????? 얼탱
         margin: 0,
         lineHeight: 20,
     },

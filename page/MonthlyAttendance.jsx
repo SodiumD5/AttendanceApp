@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Pressable, FlatList, TouchableOpacity, Alert } from "react-native";
+import { StyleSheet, View, Text, Pressable, FlatList, TouchableOpacity } from "react-native";
 import Modal from "react-native-modal";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { WebView } from "react-native-webview";
@@ -69,22 +69,15 @@ const MonthlyAttendance = ({ navigation }) => {
 
     const toggleModifyModal = (item = null) => {
         if (item) {
-            const convertTo24 = (timeStr) => {
-                if (!timeStr || timeStr === "X") return timeStr;
-                if (!timeStr.includes("오전") && !timeStr.includes("오후")) return timeStr;
-
-                const [ampm, time] = timeStr.split(" ");
-                let [hour, minute] = time.split(":").map(Number);
-
-                if (ampm === "오후" && hour < 12) hour += 12;
-                if (ampm === "오전" && hour === 12) hour = 0;
-
+            const convertToStr = (timeKo) => {
+                if (!timeKo || timeKo === "X") return timeKo;
+                let [hour, minute] = timeKo.split(":").map(Number);
                 return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
             };
 
             setSelectedDay(item.date);
-            setSelectedWorkTime(convertTo24(item.work_time));
-            setSelectedLeaveTime(convertTo24(item.leave_time));
+            setSelectedWorkTime(convertToStr(item.work_time));
+            setSelectedLeaveTime(convertToStr(item.leave_time));
             setSelectedRest(restText(item.rest));
             setActiveModal("modify");
         } else {
@@ -132,22 +125,8 @@ const MonthlyAttendance = ({ navigation }) => {
     const formatTimeForDisplay = (timeData) => {
         if (!timeData || timeData === "X") return "X";
 
-        var hour = 0;
-        if (timeData.includes("오전")) {
-            timeData = timeData.slice(3);
-        } else if (timeData.includes("오후")) {
-            timeData = timeData.slice(3);
-            hour += 12;
-        }
-
-        const [hourStr, minute] = timeData.split(":");
-        hour += parseInt(hourStr);
-
-        const ampm = hour < 12 ? "오전" : "오후";
-        const displayHour = hour % 12 === 0 ? 12 : hour % 12;
-        const formattedHour = displayHour.toString().padStart(2, "0");
-
-        return `${ampm} ${formattedHour}시 ${minute}분`;
+        const [hour, minute] = timeData.split(":");
+        return `${hour}시 ${minute}분`;
     };
 
     const handleTimeConfirm = (date, setter) => {
@@ -186,21 +165,18 @@ const MonthlyAttendance = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <AdminHeader nav={navigation} menuName="월간 출근부" />
-
             <View style={styles.titleContainer}>
                 <Text style={styles.titleText}>{titleMessage}</Text>
             </View>
-
             <Pressable style={styles.openSearchButton} onPress={() => setActiveModal("search")}>
                 <Text style={styles.openSearchButtonText}>검색 조건 설정</Text>
             </Pressable>
-
             <FlatList
                 data={searchResult}
                 keyExtractor={(item, index) => `${item.id}-${index}`}
                 ListHeaderComponent={() => (
                     <View style={styles.tableHeader}>
-                        {["날짜", "출근 시각", "퇴근 시각", "휴가"].map((t) => (
+                        {["날짜", "출근", "퇴근", "휴가"].map((t) => (
                             <Text key={t} style={styles.headerText}>
                                 {t}
                             </Text>
@@ -211,8 +187,8 @@ const MonthlyAttendance = ({ navigation }) => {
                     <TouchableOpacity onPress={() => toggleModifyModal(item)}>
                         <View style={styles.tableRow}>
                             <Text style={styles.rowText}>{item.date}</Text>
-                            <Text style={styles.rowText}>{item.work_time || "X"}</Text>
-                            <Text style={styles.rowText}>{item.leave_time || "X"}</Text>
+                            <Text style={styles.rowText}>{formatTimeForDisplay(item.work_time) || "X"}</Text>
+                            <Text style={styles.rowText}>{formatTimeForDisplay(item.leave_time) || "X"}</Text>
                             <Text style={styles.rowText}>{restText(item.rest)}</Text>
                         </View>
                     </TouchableOpacity>
@@ -225,7 +201,6 @@ const MonthlyAttendance = ({ navigation }) => {
                 )}
                 style={styles.listContainer}
             />
-
             <BottomDownload webview={openWebview} download={downloadPdf} isVisible={searchResult.length > 0} />
 
             {/* 검색 모달 */}
@@ -321,21 +296,24 @@ const MonthlyAttendance = ({ navigation }) => {
             <Modal
                 isVisible={activeModal === "webview"}
                 onBackdropPress={() => setActiveModal(null)}
-                style={{ margin: 0 }} // 전체 화면으로 띄우기 위함
+                style={{ margin: 0 }}
+                deviceHeight={null} // 안드로이드에서 전체 화면 대응을 위해 추가할 수 있음
             >
-                <View
+                <TouchableOpacity
+                    onPress={() => setActiveModal(null)}
+                    activeOpacity={1}
                     style={{
-                        height: 50,
+                        height: 30,
+                        backgroundColor: Colors.primary_red,
                         justifyContent: "center",
                         paddingHorizontal: 15,
                         borderBottomWidth: 1,
-                        borderColor: "#eee",
+                        borderColor: Colors.primary_red,
+                        marginTop: 30,
                     }}
                 >
-                    <TouchableOpacity onPress={() => setActiveModal(null)}>
-                        <Text style={{ color: "red", fontSize: 16 }}>닫기</Text>
-                    </TouchableOpacity>
-                </View>
+                    <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>닫기</Text>
+                </TouchableOpacity>
                 <WebView source={{ html: generatedHtml }} />
             </Modal>
 
@@ -376,7 +354,6 @@ const MonthlyAttendance = ({ navigation }) => {
                 keyExtractor={(i) => i}
                 renderText={(i) => i}
             />
-
             <DateTimePickerModal
                 isVisible={activeModal === "workTime"}
                 mode="time"
@@ -389,7 +366,6 @@ const MonthlyAttendance = ({ navigation }) => {
                 onConfirm={(d) => handleTimeConfirm(d, setSelectedLeaveTime)}
                 onCancel={() => setActiveModal("modify")}
             />
-
             <AlertModal
                 isVisible={showAlertModal}
                 setIsVisible={setShowAlertModal}
@@ -446,7 +422,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: Colors.primary_gray,
     },
-    rowText: { flex: 1, textAlign: "center", fontSize: 16, color: Colors.text_gray },
+    rowText: { flex: 1, textAlign: "center", fontSize: 13, color: Colors.text_gray },
     emptyContainer: { alignItems: "center", marginTop: 50 },
     emptyHeader: { fontSize: 18, fontWeight: "bold", color: Colors.text_gray, marginBottom: 10 },
     emptyText: { fontSize: 16, color: Colors.text_gray },

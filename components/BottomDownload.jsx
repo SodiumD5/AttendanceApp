@@ -19,7 +19,7 @@ export default BottomDownload;
 const styles = StyleSheet.create({
     container: { justifyContent: "space-around", flexDirection: "row" },
     text: {
-        bottom: 30,
+        bottom: 5,
         fontSize: 16,
         fontWeight: "bold",
         color: Colors.text_gray,
