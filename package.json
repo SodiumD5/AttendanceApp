@@ -21,6 +21,7 @@
     "dotenv": "^17.2.3",
     "expo": "~54.0.31",
     "expo-blur": "~15.0.8",
+    "expo-dev-client": "~6.0.20",
     "expo-file-system": "~19.0.21",
     "expo-print": "~15.0.8",
     "expo-sharing": "~14.0.8",
