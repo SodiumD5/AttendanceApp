@@ -81,7 +81,7 @@ const AnnualLedger = ({ navigation }) => {
         const { error } = await supabase.rpc("update_employee_rest_limit", {
             p_name: selectedStaff,
             p_year: selectedYear,
-            p_limit: totalRestCount,
+            p_limit: Number(limitText),
         });
 
         if (error) console.log(error.message);
